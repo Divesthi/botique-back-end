@@ -1,8 +1,8 @@
 package com.dreamworks.bqom.service;
 
-import com.dreamworks.bqom.model.CustomerDetailsModel;
-import com.dreamworks.bqom.model.CustomerMeasurementModel;
-import com.dreamworks.bqom.model.MeasurementRequestBody;
+import com.dreamworks.bqom.model.customer.CustomerDetailsModel;
+import com.dreamworks.bqom.model.customer.CustomerMeasurementModel;
+import com.dreamworks.bqom.model.customer.MeasurementRequestBody;
 import com.dreamworks.bqom.repository.CustomerMeasurementRepository;
 import com.dreamworks.bqom.repository.CustomersRepository;
 import com.dreamworks.bqom.repository.entity.CustomerDetails;

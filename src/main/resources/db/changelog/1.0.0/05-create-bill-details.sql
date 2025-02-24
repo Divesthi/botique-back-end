@@ -8,5 +8,6 @@ CREATE TABLE bill_details
     balance_amount      DECIMAL(10,2),
     status              ENUM('fresh', 'closed', 'pending'),
     discount            VARCHAR(50),
+    remarks             VARCHAR(500),
     FOREIGN KEY (mobile_no) REFERENCES customer_details(mobile_no)
 );

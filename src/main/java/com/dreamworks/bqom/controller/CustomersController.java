@@ -1,16 +1,14 @@
 package com.dreamworks.bqom.controller;
 
-import com.dreamworks.bqom.model.CustomerDetailsModel;
-import com.dreamworks.bqom.model.CustomerMeasurementModel;
-import com.dreamworks.bqom.model.MeasurementRequestBody;
-import com.dreamworks.bqom.repository.entity.CustomerDetails;
+import com.dreamworks.bqom.model.customer.CustomerDetailsModel;
+import com.dreamworks.bqom.model.customer.CustomerMeasurementModel;
+import com.dreamworks.bqom.model.customer.MeasurementRequestBody;
 import com.dreamworks.bqom.service.CustomersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController

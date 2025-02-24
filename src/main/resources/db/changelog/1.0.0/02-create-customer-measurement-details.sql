@@ -7,6 +7,5 @@ CREATE TABLE customer_measurement_details
     remarks             VARCHAR(500),
     name                VARCHAR(100) NOT NULL,
     creation_date       DATE NOT NULL,
-    FOREIGN KEY (mobile_no) REFERENCES customer_details(mobile_no),
-    UNIQUE KEY 'dress_unique (mobile_no, dress, name)
+    FOREIGN KEY (mobile_no) REFERENCES customer_details(mobile_no)
 );

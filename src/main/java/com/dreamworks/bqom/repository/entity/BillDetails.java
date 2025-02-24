@@ -1,17 +1,29 @@
 package com.dreamworks.bqom.repository.entity;
 
+import com.dreamworks.bqom.model.bill.BillModel;
+import com.dreamworks.bqom.model.order.OrderModel;
+import com.dreamworks.bqom.repository.entity.base.BaseEntity;
 import com.dreamworks.bqom.repository.enums.BillStatus;
-import com.dreamworks.bqom.repository.enums.OrderStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
-public class BillDetails implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+@Slf4j
+@Entity
+@Table(name = "bill_details")
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class BillDetails extends BaseEntity implements Serializable {
 
     @Column(name = "created_date")
     private OffsetDateTime createdDate;
@@ -32,10 +44,48 @@ public class BillDetails implements Serializable {
     @Column(name = "discount")
     private String discount;
 
+    @Column(name = "remarks")
+    private String remarks;
+
     @OneToOne(
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL)
     @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no")
     private CustomerDetails customerDetails;
+
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
+    )
+    @JoinColumn(name = "bill_id", referencedColumnName = "id")
+    private List<BillOrdersAssociation> ordersAssociations;
+
+    public static BillDetails toEntity(BillModel model, CustomerDetails customerDetails) {
+        return BillDetails.builder()
+                .advancePaid(model.getAdvancePaid())
+                .status(model.getStatus())
+                .discount(model.getDiscount())
+                .balanceAmount(model.getBalanceAmount())
+                .totalAmount(model.getTotalAmount())
+                .customerDetails(customerDetails)
+                .build();
+    }
+
+    public BillModel toModel() {
+        List<OrderModel> orders = ordersAssociations.stream().map((order) ->
+            order.getOrderDetails().toModel()
+        ).toList();
+        return BillModel.builder()
+                .id(id)
+                .advancePaid(advancePaid)
+                .balanceAmount(balanceAmount)
+                .totalAmount(totalAmount)
+                .status(status)
+                .discount(discount)
+                .createdDate(createdDate)
+                .mobileNo(customerDetails.getMobileNo())
+                .orders(orders)
+                .build();
+    }
 
 }

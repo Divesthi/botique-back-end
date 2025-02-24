@@ -1,6 +1,7 @@
 package com.dreamworks.bqom.repository.entity;
 
-import com.dreamworks.bqom.model.OrdersModel;
+import com.dreamworks.bqom.model.order.OrderModel;
+import com.dreamworks.bqom.repository.entity.base.BaseEntity;
 import com.dreamworks.bqom.repository.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Slf4j
 @Entity
@@ -17,11 +19,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderDetails implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+public class OrderDetails extends BaseEntity implements Serializable {
 
     @Column(name = "received_date")
     private OffsetDateTime receivedDate;
@@ -60,9 +58,14 @@ public class OrderDetails implements Serializable {
     @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no")
     private CustomerDetails customerDetails;
 
-    public static OrderDetails toEntity(OrdersModel model, CustomerDetails customerDetails) {
-        model.getOrderItems();
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
+    )
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    private List<OrderItemDetails> orderItems;
 
+    public static OrderDetails toEntity(OrderModel model, CustomerDetails customerDetails) {
         return OrderDetails.builder()
                 .status(model.getStatus())
                 .advance(model.getAdvance())
@@ -78,8 +81,8 @@ public class OrderDetails implements Serializable {
                 .build();
     }
 
-    public OrdersModel toModel() {
-        return OrdersModel.builder()
+    public OrderModel toModel() {
+        return OrderModel.builder()
                 .id(id)
                 .status(status)
                 .totalItems(totalItems)

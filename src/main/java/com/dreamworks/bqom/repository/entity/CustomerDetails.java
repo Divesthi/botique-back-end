@@ -1,6 +1,6 @@
 package com.dreamworks.bqom.repository.entity;
 
-import com.dreamworks.bqom.model.CustomerDetailsModel;
+import com.dreamworks.bqom.model.customer.CustomerDetailsModel;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

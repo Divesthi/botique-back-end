@@ -20,7 +20,10 @@ public class BillsController {
 
     @GetMapping("")
     @ResponseBody
-    public ResponseEntity<List<BillModel>> getBills() {
+    public ResponseEntity<List<BillModel>> getBills(@RequestParam(required = false) String search) {
+        if (search != null && !search.isEmpty()) {
+            return new ResponseEntity<>(billsService.searchBills(search), HttpStatus.OK);
+        }
         return new ResponseEntity<>(billsService.getBills(), HttpStatus.OK);
     }
 
@@ -34,7 +37,7 @@ public class BillsController {
     @PutMapping("")
     @ResponseBody
     public ResponseEntity<BillModel> updateBill(@RequestBody BillModel billModel) {
-        return new ResponseEntity<>(billsService.updateBill(billModel), HttpStatus.CREATED);
+        return new ResponseEntity<>(billsService.updateBill(billModel), HttpStatus.OK);
     }
 
 }

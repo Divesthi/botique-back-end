@@ -31,4 +31,10 @@ public interface OrdersRepository extends JpaRepository<BaseEntity, Long> {
 
     @Query("select oic from OrderItemCost oic where oic.orderItemDetails.id = :itemId")
     List<OrderItemCost> getOrderItemCostByItemId(@Param("itemId") Long itemId);
+
+    @Query("select od from OrderDetails od where " +
+           "lower(od.customerDetails.name) like lower(concat('%', :searchTerm, '%')) or " +
+           "od.customerDetails.mobileNo like concat('%', :searchTerm, '%') or " +
+           "cast(od.id as string) like concat('%', :searchTerm, '%')")
+    List<OrderDetails> searchOrders(@Param("searchTerm") String searchTerm);
 }

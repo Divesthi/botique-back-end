@@ -18,7 +18,10 @@ public class OrdersController {
 
     @GetMapping("")
     @ResponseBody
-    public ResponseEntity<List<OrderModel>> getOrders() {
+    public ResponseEntity<List<OrderModel>> getOrders(@RequestParam(required = false) String search) {
+        if (search != null && !search.isEmpty()) {
+            return new ResponseEntity<>(ordersService.searchOrders(search), HttpStatus.OK);
+        }
         return new ResponseEntity<>(ordersService.getOrders(), HttpStatus.OK);
     }
 
@@ -27,6 +30,17 @@ public class OrdersController {
     public ResponseEntity createOrder(@RequestBody OrderModel orderModel){
         ordersService.createOrder(orderModel);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PutMapping("")
+    @ResponseBody
+    public ResponseEntity<OrderModel> updateOrder(@RequestBody OrderModel orderModel){
+        try {
+            OrderModel updatedOrder = ordersService.updateOrder(orderModel);
+            return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

@@ -52,6 +52,9 @@ public class OrderDetails extends BaseEntity implements Serializable {
     @Column(name = "balance")
     private Double balance;
 
+    @Column(name = "estimate_amount", columnDefinition = "JSON")
+    private String estimateAmount;
+
     @OneToOne(
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL)
@@ -78,6 +81,7 @@ public class OrderDetails extends BaseEntity implements Serializable {
                 .packagingDate(model.getPackagingDate())
                 .deliveryDate(model.getDeliveryDate())
                 .remarks(model.getRemarks())
+                .estimateAmount(model.getEstimateAmount())
                 .build();
     }
 
@@ -95,6 +99,8 @@ public class OrderDetails extends BaseEntity implements Serializable {
                 .balance(balance)
                 .remarks(remarks)
                 .mobileNo(customerDetails.getMobileNo())
+                .estimateAmount(estimateAmount)
+                .orderItems(orderItems != null ? orderItems.stream().map(OrderItemDetails::toModel).toList() : List.of())
                 .build();
     }
 }

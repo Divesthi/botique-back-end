@@ -24,4 +24,11 @@ public interface CustomerMeasurementRepository extends JpaRepository<CustomerMea
                                                                      @Param("name") String name,
                                                                      @Param("dressType") String dressType);
 
+    @Query("select cmd from CustomerMeasurementDetails cmd where " +
+           "lower(cmd.customerDetails.name) like lower(concat('%', :searchTerm, '%')) or " +
+           "cmd.customerDetails.mobileNo like concat('%', :searchTerm, '%') or " +
+           "lower(cmd.name) like lower(concat('%', :searchTerm, '%')) or " +
+           "lower(cmd.dressType) like lower(concat('%', :searchTerm, '%'))")
+    List<CustomerMeasurementDetails> searchMeasurements(@Param("searchTerm") String searchTerm);
+
 }

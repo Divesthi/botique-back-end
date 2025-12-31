@@ -9,6 +9,5 @@ public class OrderItemCostModel {
     private Long id;
     private Double cost;
     private String type;
-    private String mobileNo;
     private Long orderId;
 }

@@ -56,7 +56,6 @@ public class OrderItemCost extends BaseEntity implements Serializable {
                 .cost(cost)
                 .orderItemId(orderItemDetails.getId())
                 .type(type)
-                .mobileNo(customerDetails.getMobileNo())
                 .build();
     }
 

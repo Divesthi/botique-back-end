@@ -85,6 +85,7 @@ public class BillDetails extends BaseEntity implements Serializable {
                 .createdDate(createdDate)
                 .mobileNo(customerDetails.getMobileNo())
                 .orders(orders)
+                .remarks(remarks)
                 .build();
     }
 

@@ -25,4 +25,10 @@ public interface BillRepository extends JpaRepository<BaseEntity, Long> {
     @Query("select boa.orderDetails from BillOrdersAssociation boa where boa.billDetails.id = :billId")
     List<OrderDetails> getOrdersForBillId(@Param("billId") String billId);
 
+    @Query("select bd from BillDetails bd where " +
+           "lower(bd.customerDetails.name) like lower(concat('%', :searchTerm, '%')) or " +
+           "bd.customerDetails.mobileNo like concat('%', :searchTerm, '%') or " +
+           "cast(bd.id as string) like concat('%', :searchTerm, '%')")
+    List<BillDetails> searchBills(@Param("searchTerm") String searchTerm);
+
 }

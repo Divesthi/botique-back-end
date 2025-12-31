@@ -84,6 +84,7 @@ public class OrderItemDetails extends BaseEntity implements Serializable {
                 .mobileNo(customerDetails.getMobileNo())
                 .orderId(orderDetails.getId())
                 .measurementId(customerMeasurementDetails.getId())
+                .itemsCost(itemCosts != null ? itemCosts.stream().map(OrderItemCost::toModel).toList() : List.of())
                 .build();
     }
 }

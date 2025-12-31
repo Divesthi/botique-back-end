@@ -7,7 +7,6 @@ import java.util.Map;
 
 @Data
 public class MeasurementRequestBody {
-    @NonNull
     private String mobileNo;
     private String name;
     private String dressType;

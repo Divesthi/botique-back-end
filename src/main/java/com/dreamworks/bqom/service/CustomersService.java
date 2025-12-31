@@ -8,12 +8,13 @@ import com.dreamworks.bqom.repository.CustomersRepository;
 import com.dreamworks.bqom.repository.entity.CustomerDetails;
 import com.dreamworks.bqom.repository.entity.CustomerMeasurementDetails;
 import lombok.extern.slf4j.Slf4j;
+import org.antlr.v4.runtime.atn.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -37,6 +38,36 @@ public class CustomersService {
                 .build()).toList();
     }
 
+    public List<CustomerDetailsModel> searchCustomers(String searchTerm) {
+        if (StringUtils.isBlank(searchTerm)) {
+            return getCustomers();
+        }
+        List<CustomerDetails> customers = customersRepository.searchCustomers(searchTerm);
+        return customers.stream().map((customer) -> CustomerDetailsModel.builder()
+                .address(customer.getAddress())
+                .id(customer.getId())
+                .name(customer.getName())
+                .alternateContactNo(customer.getAlternateContactNo())
+                .mobileNo(customer.getMobileNo())
+                .tenantId(customer.getTenantId())
+                .creationDate(customer.getCreationDate())
+                .build()).toList();
+    }
+
+    public List<CustomerDetailsModel> getCustomer(String contactNumber) {
+        CustomerDetails customerDetails = customersRepository.getCustomerDetailsByMobileNumber(contactNumber);
+        if (customerDetails != null) {
+            List<CustomerDetailsModel> customers = new ArrayList<>(1);
+            customers.add(customerDetails.toModel());
+            return  customers;
+        } else {
+            String message = String.format("Customer with the contact number - %s doesn't exists in our system",
+                    contactNumber);
+            log.error(message);
+            return Collections.emptyList();
+        }
+    }
+
     public CustomerDetailsModel createCustomer(CustomerDetailsModel customerDetailsModel) {
         try {
             CustomerDetails customerDetails = CustomerDetails.toEntity(customerDetailsModel);
@@ -52,11 +83,55 @@ public class CustomersService {
         return customerDetailsModel;
     }
 
-    public List<CustomerMeasurementModel> getCustomerMeasurements(MeasurementRequestBody measurementRequestBody) {
+    public CustomerDetailsModel updateCustomer(CustomerDetailsModel customerDetailsModel) {
+        try {
+            Optional<CustomerDetails> customerDetailOpt = customersRepository.findById(customerDetailsModel.getId());
+            if (customerDetailOpt.isPresent()) {
+                CustomerDetails customerDetails = customerDetailOpt.get();
+                customerDetails.setName(customerDetailsModel.getName());
+                customerDetails.setAddress(customerDetailsModel.getAddress());
+                customerDetails.setAlternateContactNo(customerDetailsModel.getAlternateContactNo());
+                customersRepository.save(customerDetails);
+            } else {
+                log.error("Customer with the given contact number - {} doesn't exists", customerDetailsModel.getMobileNo());
+            }
+        } catch (Exception e) {
+            log.error("Error while persisting the customer information - {}", customerDetailsModel.getMobileNo(),
+                    e);
+            throw e;
+        }
+        return customerDetailsModel;
+    }
+
+
+    public List<CustomerMeasurementModel> getCustomerMeasurements(String mobileNo) {
         List<CustomerMeasurementModel> customerMeasurementModels = null;
         try {
             List<CustomerMeasurementDetails> customerMeasurements =
-                    customerMeasurementRepository.getMeasurementByMobileNo(measurementRequestBody.getMobileNo());
+                        customerMeasurementRepository.getMeasurementByMobileNo(mobileNo);
+            customerMeasurementModels =
+                        customerMeasurements.stream()
+                                .map((customerMeasurement) -> CustomerMeasurementModel.builder()
+                                        .measurement(customerMeasurement.getMeasurement())
+                                        .name(customerMeasurement.getName())
+                                        .dressType(customerMeasurement.getDressType())
+                                        .remarks(customerMeasurement.getRemarks())
+                                        .mobileNo(customerMeasurement.getCustomerDetails().getMobileNo())
+                                        .creationDate(customerMeasurement.getCreationDate())
+                                        .id(customerMeasurement.getId())
+                                        .build()).toList();
+        } catch (Exception e) {
+            log.error("Error while obtaining the measurement for the customer - {}", mobileNo, e);
+            throw e;
+        }
+        return customerMeasurementModels;
+    }
+
+    public List<CustomerMeasurementModel> getMeasurements() {
+        List<CustomerMeasurementModel> customerMeasurementModels = null;
+        try {
+            List<CustomerMeasurementDetails> customerMeasurements =
+                    customerMeasurementRepository.findAll();
             customerMeasurementModels =
                     customerMeasurements.stream()
                             .map((customerMeasurement) -> CustomerMeasurementModel.builder()
@@ -69,7 +144,33 @@ public class CustomersService {
                                     .id(customerMeasurement.getId())
                                     .build()).toList();
         } catch (Exception e) {
-            log.error("Error while obtaining the measurement for the customer - {}", measurementRequestBody.getMobileNo(), e);
+            log.error("Error while obtaining the measurements", e);
+            throw e;
+        }
+        return customerMeasurementModels;
+    }
+
+    public List<CustomerMeasurementModel> searchMeasurements(String searchTerm) {
+        if (StringUtils.isBlank(searchTerm)) {
+            return getMeasurements();
+        }
+        List<CustomerMeasurementModel> customerMeasurementModels = null;
+        try {
+            List<CustomerMeasurementDetails> customerMeasurements =
+                    customerMeasurementRepository.searchMeasurements(searchTerm);
+            customerMeasurementModels =
+                    customerMeasurements.stream()
+                            .map((customerMeasurement) -> CustomerMeasurementModel.builder()
+                                    .measurement(customerMeasurement.getMeasurement())
+                                    .name(customerMeasurement.getName())
+                                    .dressType(customerMeasurement.getDressType())
+                                    .remarks(customerMeasurement.getRemarks())
+                                    .mobileNo(customerMeasurement.getCustomerDetails().getMobileNo())
+                                    .creationDate(customerMeasurement.getCreationDate())
+                                    .id(customerMeasurement.getId())
+                                    .build()).toList();
+        } catch (Exception e) {
+            log.error("Error while searching measurements", e);
             throw e;
         }
         return customerMeasurementModels;
@@ -105,6 +206,7 @@ public class CustomersService {
                 details.setName(measurementModel.getName());
                 details.setMeasurement(measurementModel.getMeasurement());
                 details.setRemarks(measurementModel.getRemarks());
+                details.setCreationDate(OffsetDateTime.now());
                 // NOTE: Dress Type is not allowed for changing
                 //details.setDressType(measurementModel.getDressType());
                 details = customerMeasurementRepository.save(details);

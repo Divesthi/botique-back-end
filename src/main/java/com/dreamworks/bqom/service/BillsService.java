@@ -10,9 +10,9 @@ import com.dreamworks.bqom.repository.entity.BillOrdersAssociation;
 import com.dreamworks.bqom.repository.entity.CustomerDetails;
 import com.dreamworks.bqom.repository.entity.OrderDetails;
 import com.dreamworks.bqom.repository.enums.BillStatus;
-import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,6 +33,13 @@ public class BillsService {
 
     public List<BillModel> getBills() {
         return billRepository.getBills().stream().map((bill) -> bill.toModel()).toList();
+    }
+
+    public List<BillModel> searchBills(String searchTerm) {
+        if (StringUtils.isBlank(searchTerm)) {
+            return getBills();
+        }
+        return billRepository.searchBills(searchTerm).stream().map((bill) -> bill.toModel()).toList();
     }
 
     @Transactional
@@ -85,6 +92,9 @@ public class BillsService {
             }
             if (billModel.getDiscount() != null) {
                 billDetails.setDiscount(billModel.getDiscount());
+            }
+            if (!StringUtils.isEmpty(billModel.getRemarks())) {
+                billDetails.setRemarks(billModel.getRemarks());
             }
             billDetails = billRepository.save(billDetails);
             return billDetails.toModel();

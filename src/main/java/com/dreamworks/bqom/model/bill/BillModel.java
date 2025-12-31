@@ -20,4 +20,5 @@ public class BillModel {
     private String discount;
     private String mobileNo;
     private List<OrderModel> orders;
+    private String remarks;
 }

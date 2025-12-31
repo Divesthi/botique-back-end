@@ -14,4 +14,10 @@ public interface CustomersRepository extends JpaRepository<CustomerDetails, Long
 
     @Query("select cd from CustomerDetails cd where cd.mobileNo = :mobileNo")
     CustomerDetails getCustomerDetailsByMobileNumber(@Param("mobileNo") String mobileNo);
+
+    @Query("select cd from CustomerDetails cd where " +
+           "lower(cd.name) like lower(concat('%', :searchTerm, '%')) or " +
+           "cd.mobileNo like concat('%', :searchTerm, '%') or " +
+           "cd.alternateContactNo like concat('%', :searchTerm, '%')")
+    List<CustomerDetails> searchCustomers(@Param("searchTerm") String searchTerm);
 }

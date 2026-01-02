@@ -119,29 +119,47 @@ public class OrdersService {
 
                     // Add new items and costs
                     List<OrderItemDetails> orderItemDetails = new ArrayList<>();
-                    Map<Long, List<OrderItemCostModel>> itemCostMap = new HashMap<>();
+                    List<OrderItemCostModel> allItemCosts = new ArrayList<>();
 
                     for (OrderItemModel itemModel : orderModel.getOrderItems()) {
+                        log.info("Looking for measurement ID: {}", itemModel.getMeasurementId());
                         Optional<CustomerMeasurementDetails> customerMeasurementDetailsOpt =
                                 customerMeasurementRepository.findById(itemModel.getMeasurementId());
+
+                        log.info("Measurement found: {}", customerMeasurementDetailsOpt.isPresent());
+                        if (customerMeasurementDetailsOpt.isEmpty()) {
+                            // Try to load all measurements to debug
+                            List<CustomerMeasurementDetails> allMeasurements = customerMeasurementRepository.findAll();
+                            log.error("Measurement not found with ID: {}. Total measurements in DB: {}",
+                                itemModel.getMeasurementId(), allMeasurements.size());
+                            throw new RuntimeException("Measurement not found with ID: " + itemModel.getMeasurementId());
+                        }
+
                         OrderItemDetails itemDetails = OrderItemDetails.toEntity(itemModel, customerDetails,
                                 customerMeasurementDetailsOpt.get(), orderDetails);
                         itemDetails.setStatus(itemModel.getStatus() != null ? itemModel.getStatus() : OrderStatus.in_progress);
                         orderItemDetails.add(itemDetails);
-                        itemCostMap.put(itemModel.getMeasurementId(), itemModel.getItemsCost());
+
+                        // Store costs with reference to the item index
+                        if (itemModel.getItemsCost() != null) {
+                            allItemCosts.addAll(itemModel.getItemsCost());
+                        }
                     }
 
                     orderItemDetails = ordersRepository.saveAll(orderItemDetails);
 
-                    // Save costs
+                    // Save costs - map by index to maintain proper association
                     List<OrderItemCost> costsEntity = new ArrayList<>();
-                    for (OrderItemDetails orderItem : orderItemDetails) {
-                        List<OrderItemCostModel> itemCosts = itemCostMap.get(orderItem.getCustomerMeasurementDetails().getId());
+                    int itemIndex = 0;
+                    for (OrderItemModel itemModel : orderModel.getOrderItems()) {
+                        OrderItemDetails savedItem = orderItemDetails.get(itemIndex);
+                        List<OrderItemCostModel> itemCosts = itemModel.getItemsCost();
                         if (itemCosts != null) {
                             for (OrderItemCostModel itemCostModel : itemCosts) {
-                                costsEntity.add(OrderItemCost.toEntity(itemCostModel, customerDetails, orderItem));
+                                costsEntity.add(OrderItemCost.toEntity(itemCostModel, customerDetails, savedItem));
                             }
                         }
+                        itemIndex++;
                     }
                     ordersRepository.saveAll(costsEntity);
                     log.info("Order items and costs updated for order - {}", orderDetails.getId());

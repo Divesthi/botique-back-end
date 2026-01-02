@@ -30,14 +30,12 @@ public class OrderItemCost extends BaseEntity implements Serializable {
     private String remarks;
 
     @OneToOne(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+            fetch = FetchType.EAGER)
     @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no")
     private CustomerDetails customerDetails;
 
     @OneToOne(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+            fetch = FetchType.EAGER)
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     private OrderItemDetails orderItemDetails;
 

@@ -35,21 +35,15 @@ public class OrderItemDetails extends BaseEntity implements Serializable {
     @Column(name = "status")
     private OrderStatus status;
 
-    @OneToOne(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no")
     private CustomerDetails customerDetails;
 
-    @OneToOne(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private OrderDetails orderDetails;
 
-    @OneToOne(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "measurement_id", referencedColumnName = "id")
     private CustomerMeasurementDetails customerMeasurementDetails;
 

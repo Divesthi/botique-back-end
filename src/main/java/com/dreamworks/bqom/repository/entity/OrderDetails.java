@@ -55,9 +55,7 @@ public class OrderDetails extends BaseEntity implements Serializable {
     @Column(name = "estimate_amount", columnDefinition = "JSON")
     private String estimateAmount;
 
-    @OneToOne(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no")
     private CustomerDetails customerDetails;
 

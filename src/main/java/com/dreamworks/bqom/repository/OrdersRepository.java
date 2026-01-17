@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -37,4 +38,16 @@ public interface OrdersRepository extends JpaRepository<BaseEntity, Long> {
            "od.customerDetails.mobileNo like concat('%', :searchTerm, '%') or " +
            "cast(od.id as string) like concat('%', :searchTerm, '%')")
     List<OrderDetails> searchOrders(@Param("searchTerm") String searchTerm);
+
+    @Query("select od from OrderDetails od where od.deliveryDate >= :fromDate and od.deliveryDate <= :toDate")
+    List<OrderDetails> getOrdersByDateRange(@Param("fromDate") OffsetDateTime fromDate, @Param("toDate") OffsetDateTime toDate);
+
+    @Query("select od from OrderDetails od where " +
+           "(lower(od.customerDetails.name) like lower(concat('%', :searchTerm, '%')) or " +
+           "od.customerDetails.mobileNo like concat('%', :searchTerm, '%') or " +
+           "cast(od.id as string) like concat('%', :searchTerm, '%')) and " +
+           "od.deliveryDate >= :fromDate and od.deliveryDate <= :toDate")
+    List<OrderDetails> searchOrdersWithDateRange(@Param("searchTerm") String searchTerm,
+                                                  @Param("fromDate") OffsetDateTime fromDate,
+                                                  @Param("toDate") OffsetDateTime toDate);
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Repository
@@ -31,4 +32,15 @@ public interface BillRepository extends JpaRepository<BaseEntity, Long> {
            "cast(bd.id as string) like concat('%', :searchTerm, '%')")
     List<BillDetails> searchBills(@Param("searchTerm") String searchTerm);
 
+    @Query("select bd from BillDetails bd where bd.createdDate >= :fromDate and bd.createdDate <= :toDate")
+    List<BillDetails> getBillsByDateRange(@Param("fromDate") OffsetDateTime fromDate, @Param("toDate") OffsetDateTime toDate);
+
+    @Query("select bd from BillDetails bd where " +
+           "(lower(bd.customerDetails.name) like lower(concat('%', :searchTerm, '%')) or " +
+           "bd.customerDetails.mobileNo like concat('%', :searchTerm, '%') or " +
+           "cast(bd.id as string) like concat('%', :searchTerm, '%')) and " +
+           "bd.createdDate >= :fromDate and bd.createdDate <= :toDate")
+    List<BillDetails> searchBillsWithDateRange(@Param("searchTerm") String searchTerm,
+                                                @Param("fromDate") OffsetDateTime fromDate,
+                                                @Param("toDate") OffsetDateTime toDate);
 }

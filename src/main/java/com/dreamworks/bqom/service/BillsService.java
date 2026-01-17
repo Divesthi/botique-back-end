@@ -42,6 +42,20 @@ public class BillsService {
         return billRepository.searchBills(searchTerm).stream().map((bill) -> bill.toModel()).toList();
     }
 
+    public List<BillModel> getBillsByDateRange(OffsetDateTime fromDate, OffsetDateTime toDate) {
+        return billRepository.getBillsByDateRange(fromDate, toDate).stream().map(BillDetails::toModel).toList();
+    }
+
+    public List<BillModel> searchBillsWithDateRange(String searchTerm, OffsetDateTime fromDate, OffsetDateTime toDate) {
+        List<BillDetails> bills;
+        if (StringUtils.isBlank(searchTerm)) {
+            bills = billRepository.getBillsByDateRange(fromDate, toDate);
+        } else {
+            bills = billRepository.searchBillsWithDateRange(searchTerm, fromDate, toDate);
+        }
+        return bills.stream().map(BillDetails::toModel).toList();
+    }
+
     @Transactional
     public void createBill(BillModel billModel) {
         try {

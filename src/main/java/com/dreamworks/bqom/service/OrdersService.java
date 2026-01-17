@@ -47,6 +47,21 @@ public class OrdersService {
         }).toList();
     }
 
+    public List<OrderModel> getOrdersByDateRange(OffsetDateTime fromDate, OffsetDateTime toDate) {
+        List<OrderDetails> orders = ordersRepository.getOrdersByDateRange(fromDate, toDate);
+        return orders.stream().map(OrderDetails::toModel).toList();
+    }
+
+    public List<OrderModel> searchOrdersWithDateRange(String searchTerm, OffsetDateTime fromDate, OffsetDateTime toDate) {
+        List<OrderDetails> orders;
+        if (StringUtils.isBlank(searchTerm)) {
+            orders = ordersRepository.getOrdersByDateRange(fromDate, toDate);
+        } else {
+            orders = ordersRepository.searchOrdersWithDateRange(searchTerm, fromDate, toDate);
+        }
+        return orders.stream().map(OrderDetails::toModel).toList();
+    }
+
     @Transactional
     public void createOrder(OrderModel orderModel) {
         try {

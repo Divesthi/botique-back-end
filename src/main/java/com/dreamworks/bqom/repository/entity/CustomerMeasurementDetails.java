@@ -41,10 +41,16 @@ public class CustomerMeasurementDetails implements Serializable {
     @Column(name = "creation_date")
     private OffsetDateTime creationDate;
 
+    @Column(name = "tenant_code", insertable = false, updatable = false)
+    private String tenantCode;
+
     @OneToOne(
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL)
-    @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no")
+    @JoinColumns({
+            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no"),
+            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code")
+    })
     private CustomerDetails customerDetails;
 
     public static CustomerMeasurementDetails toEntity(CustomerMeasurementModel customerMeasurementModel,
@@ -65,6 +71,7 @@ public class CustomerMeasurementDetails implements Serializable {
                 .remarks(remarks)
                 .dressType(dressType)
                 .mobileNo(customerDetails.getMobileNo())
+                .tenantCode(customerDetails.getTenantCode())
                 .creationDate(creationDate)
                 .id(id)
                 .build();

@@ -10,7 +10,8 @@ import java.time.OffsetDateTime;
 
 @Slf4j
 @Entity
-@Table(name = "customer_details")
+@Table(name = "customer_details",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"mobile_no", "tenant_code"}))
 @Getter
 @Setter
 @Builder
@@ -34,8 +35,8 @@ public class CustomerDetails implements Serializable {
     @Column(name = "alternate_contact_no")
     private String alternateContactNo;
 
-    @Column(name = "tenant_id")
-    private String tenantId;
+    @Column(name = "tenant_code")
+    private String tenantCode;
 
     @Column(name = "creation_date")
     private OffsetDateTime creationDate;
@@ -44,7 +45,7 @@ public class CustomerDetails implements Serializable {
         return CustomerDetailsModel.builder()
         .name(name)
         .address(address)
-        .tenantId(tenantId)
+        .tenantCode(tenantCode)
         .creationDate(creationDate)
         .alternateContactNo(alternateContactNo)
         .id(id)
@@ -57,7 +58,7 @@ public class CustomerDetails implements Serializable {
                 .address(customerDetailsModel.getAddress())
                 .mobileNo(customerDetailsModel.getMobileNo())
                 .alternateContactNo(customerDetailsModel.getAlternateContactNo())
-                .tenantId(customerDetailsModel.getTenantId())
+                .tenantCode(customerDetailsModel.getTenantCode())
                 .build();
     }
 }

@@ -55,8 +55,14 @@ public class OrderDetails extends BaseEntity implements Serializable {
     @Column(name = "estimate_amount", columnDefinition = "JSON")
     private String estimateAmount;
 
+    @Column(name = "tenant_code", insertable = false, updatable = false)
+    private String tenantCode;
+
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no")
+    @JoinColumns({
+            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no"),
+            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code")
+    })
     private CustomerDetails customerDetails;
 
     @OneToMany(
@@ -97,6 +103,7 @@ public class OrderDetails extends BaseEntity implements Serializable {
                 .balance(balance)
                 .remarks(remarks)
                 .mobileNo(customerDetails.getMobileNo())
+                .tenantCode(customerDetails.getTenantCode())
                 .estimateAmount(estimateAmount)
                 .orderItems(orderItems != null ? orderItems.stream().map(OrderItemDetails::toModel).toList() : List.of())
                 .build();

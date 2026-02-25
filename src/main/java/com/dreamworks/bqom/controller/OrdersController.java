@@ -14,7 +14,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/v1/bqom/orders", produces = "application/json")
+@RequestMapping(path = "/v1/bqom/tenants/{tenantCode}/orders", produces = "application/json")
 @CrossOrigin(origins="*")
 public class OrdersController {
     @Autowired
@@ -23,6 +23,7 @@ public class OrdersController {
     @GetMapping("")
     @ResponseBody
     public ResponseEntity<List<OrderModel>> getOrders(
+            @PathVariable String tenantCode,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
@@ -35,33 +36,36 @@ public class OrdersController {
             OffsetDateTime toDateTime = toDate.atTime(23, 59, 59).atOffset(ZoneOffset.UTC);
 
             if (hasSearch) {
-                return new ResponseEntity<>(ordersService.searchOrdersWithDateRange(search, fromDateTime, toDateTime), HttpStatus.OK);
+                return new ResponseEntity<>(ordersService.searchOrdersWithDateRange(search, fromDateTime, toDateTime, tenantCode), HttpStatus.OK);
             }
-            return new ResponseEntity<>(ordersService.getOrdersByDateRange(fromDateTime, toDateTime), HttpStatus.OK);
+            return new ResponseEntity<>(ordersService.getOrdersByDateRange(fromDateTime, toDateTime, tenantCode), HttpStatus.OK);
         }
 
         if (hasSearch) {
-            return new ResponseEntity<>(ordersService.searchOrders(search), HttpStatus.OK);
+            return new ResponseEntity<>(ordersService.searchOrders(search, tenantCode), HttpStatus.OK);
         }
-        return new ResponseEntity<>(ordersService.getOrders(), HttpStatus.OK);
+        return new ResponseEntity<>(ordersService.getOrders(tenantCode), HttpStatus.OK);
     }
 
     @PostMapping("")
     @ResponseBody
-    public ResponseEntity createOrder(@RequestBody OrderModel orderModel){
-        ordersService.createOrder(orderModel);
+    public ResponseEntity createOrder(
+            @PathVariable String tenantCode,
+            @RequestBody OrderModel orderModel) {
+        ordersService.createOrder(orderModel, tenantCode);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("")
     @ResponseBody
-    public ResponseEntity<OrderModel> updateOrder(@RequestBody OrderModel orderModel){
+    public ResponseEntity<OrderModel> updateOrder(
+            @PathVariable String tenantCode,
+            @RequestBody OrderModel orderModel) {
         try {
-            OrderModel updatedOrder = ordersService.updateOrder(orderModel);
+            OrderModel updatedOrder = ordersService.updateOrder(orderModel, tenantCode);
             return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }

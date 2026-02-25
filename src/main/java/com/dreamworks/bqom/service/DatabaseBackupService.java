@@ -34,8 +34,8 @@ public class DatabaseBackupService {
     @Value("${backup.retention.days:30}")
     private int retentionDays;
 
-    @Value("${backup.mysqldump.path:mysqldump}")
-    private String mysqldumpPath;
+    @Value("${backup.pgdump.path:pg_dump}")
+    private String pgdumpPath;
 
     private String dbName;
     private String dbHost;
@@ -44,13 +44,13 @@ public class DatabaseBackupService {
     @PostConstruct
     public void init() {
         // Parse database connection details from URL
-        // Format: jdbc:mysql://localhost:3306/bqom
+        // Format: jdbc:postgresql://localhost:5432/bqom
         try {
-            String urlWithoutPrefix = dbUrl.replace("jdbc:mysql://", "");
+            String urlWithoutPrefix = dbUrl.replace("jdbc:postgresql://", "");
             String[] parts = urlWithoutPrefix.split("/");
             String[] hostPort = parts[0].split(":");
             dbHost = hostPort[0];
-            dbPort = hostPort.length > 1 ? hostPort[1] : "3306";
+            dbPort = hostPort.length > 1 ? hostPort[1] : "5432";
             dbName = parts[1].split("\\?")[0]; // Remove any query parameters
 
             // Create backup directory if it doesn't exist
@@ -92,20 +92,17 @@ public class DatabaseBackupService {
         try {
             log.info("Creating database backup: {}", backupFilePath);
 
-            // Build mysqldump command
+            // Build pg_dump command
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    mysqldumpPath,
+                    pgdumpPath,
                     "-h", dbHost,
-                    "-P", dbPort,
-                    "-u", dbUsername,
-                    "--password=" + dbPassword,
-                    "--single-transaction",
-                    "--routines",
-                    "--triggers",
-                    "--add-drop-table",
-                    "--complete-insert",
+                    "-p", dbPort,
+                    "-U", dbUsername,
+                    "-F", "p",
+                    "--clean",
                     dbName
             );
+            processBuilder.environment().put("PGPASSWORD", dbPassword);
 
             // Redirect output to backup file
             File backupFile = new File(backupFilePath);
@@ -200,15 +197,15 @@ public class DatabaseBackupService {
                 return false;
             }
 
-            // Build mysql restore command
+            // Build psql restore command
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "mysql",
+                    "psql",
                     "-h", dbHost,
-                    "-P", dbPort,
-                    "-u", dbUsername,
-                    "--password=" + dbPassword,
-                    dbName
+                    "-p", dbPort,
+                    "-U", dbUsername,
+                    "-d", dbName
             );
+            processBuilder.environment().put("PGPASSWORD", dbPassword);
 
             // Redirect input from backup file
             processBuilder.redirectInput(backupFile);

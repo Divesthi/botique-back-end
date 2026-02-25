@@ -13,6 +13,7 @@ public class OrderItemModel {
     private Long orderId;
     private Long measurementId;
     private String mobileNo;
+    private String tenantCode;
     private String remarks;
     private int quantity;
     private Double costPerQuantity;

@@ -196,6 +196,7 @@ CustomerDetails (1) ─────────────── (Many) OrderDe
 spring.datasource.url=jdbc:mysql://localhost:3306/bqom
 spring.datasource.username=root
 spring.datasource.password=Welcome123
+
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 spring.jpa.hibernate.ddl-auto=none  # Liquibase manages schema
 ```

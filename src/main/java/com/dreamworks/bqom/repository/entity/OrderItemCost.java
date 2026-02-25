@@ -29,13 +29,17 @@ public class OrderItemCost extends BaseEntity implements Serializable {
     @Column(name = "remarks")
     private String remarks;
 
-    @OneToOne(
-            fetch = FetchType.EAGER)
-    @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no")
+    @Column(name = "tenant_code", insertable = false, updatable = false)
+    private String tenantCode;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumns({
+            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no"),
+            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code")
+    })
     private CustomerDetails customerDetails;
 
-    @OneToOne(
-            fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     private OrderItemDetails orderItemDetails;
 
@@ -56,5 +60,4 @@ public class OrderItemCost extends BaseEntity implements Serializable {
                 .type(type)
                 .build();
     }
-
 }

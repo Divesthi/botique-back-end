@@ -19,6 +19,7 @@ public class BillModel {
     private BillStatus status;
     private String discount;
     private String mobileNo;
+    private String tenantCode;
     private List<OrderModel> orders;
     private String remarks;
 }

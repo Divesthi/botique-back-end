@@ -1,7 +1,6 @@
 package com.dreamworks.bqom.controller;
 
 import com.dreamworks.bqom.model.bill.BillModel;
-import com.dreamworks.bqom.model.order.OrderModel;
 import com.dreamworks.bqom.service.BillsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,7 +14,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/v1/bqom/bills", produces = "application/json")
+@RequestMapping(path = "/v1/bqom/tenants/{tenantCode}/bills", produces = "application/json")
 @CrossOrigin(origins="*")
 public class BillsController {
 
@@ -25,6 +24,7 @@ public class BillsController {
     @GetMapping("")
     @ResponseBody
     public ResponseEntity<List<BillModel>> getBills(
+            @PathVariable String tenantCode,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
@@ -37,28 +37,31 @@ public class BillsController {
             OffsetDateTime toDateTime = toDate.atTime(23, 59, 59).atOffset(ZoneOffset.UTC);
 
             if (hasSearch) {
-                return new ResponseEntity<>(billsService.searchBillsWithDateRange(search, fromDateTime, toDateTime), HttpStatus.OK);
+                return new ResponseEntity<>(billsService.searchBillsWithDateRange(search, fromDateTime, toDateTime, tenantCode), HttpStatus.OK);
             }
-            return new ResponseEntity<>(billsService.getBillsByDateRange(fromDateTime, toDateTime), HttpStatus.OK);
+            return new ResponseEntity<>(billsService.getBillsByDateRange(fromDateTime, toDateTime, tenantCode), HttpStatus.OK);
         }
 
         if (hasSearch) {
-            return new ResponseEntity<>(billsService.searchBills(search), HttpStatus.OK);
+            return new ResponseEntity<>(billsService.searchBills(search, tenantCode), HttpStatus.OK);
         }
-        return new ResponseEntity<>(billsService.getBills(), HttpStatus.OK);
+        return new ResponseEntity<>(billsService.getBills(tenantCode), HttpStatus.OK);
     }
 
     @PostMapping("")
     @ResponseBody
-    public ResponseEntity createBill(@RequestBody BillModel billModel) {
-        billsService.createBill(billModel);
+    public ResponseEntity createBill(
+            @PathVariable String tenantCode,
+            @RequestBody BillModel billModel) {
+        billsService.createBill(billModel, tenantCode);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PutMapping("")
     @ResponseBody
-    public ResponseEntity<BillModel> updateBill(@RequestBody BillModel billModel) {
-        return new ResponseEntity<>(billsService.updateBill(billModel), HttpStatus.OK);
+    public ResponseEntity<BillModel> updateBill(
+            @PathVariable String tenantCode,
+            @RequestBody BillModel billModel) {
+        return new ResponseEntity<>(billsService.updateBill(billModel, tenantCode), HttpStatus.OK);
     }
-
 }

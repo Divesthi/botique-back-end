@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.query.Order;
 
 import java.io.Serializable;
 
@@ -20,10 +19,16 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class BillOrdersAssociation extends BaseEntity implements Serializable {
 
+    @Column(name = "tenant_code", insertable = false, updatable = false)
+    private String tenantCode;
+
     @OneToOne(
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL)
-    @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no")
+    @JoinColumns({
+            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no"),
+            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code")
+    })
     private CustomerDetails customerDetails;
 
     @OneToOne(

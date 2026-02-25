@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/v1/bqom/customers", produces = "application/json")
+@RequestMapping(path = "/v1/bqom/tenants/{tenantCode}/customers", produces = "application/json")
 @CrossOrigin(origins="*")
 public class CustomersController {
 
@@ -22,24 +22,30 @@ public class CustomersController {
 
     @GetMapping("")
     @ResponseBody
-    public ResponseEntity<List<CustomerDetailsModel>> getCustomers(@RequestParam(required = false) String search) {
+    public ResponseEntity<List<CustomerDetailsModel>> getCustomers(
+            @PathVariable String tenantCode,
+            @RequestParam(required = false) String search) {
         if (search != null && !search.isEmpty()) {
-            return new ResponseEntity<>(customersService.searchCustomers(search), HttpStatus.OK);
+            return new ResponseEntity<>(customersService.searchCustomers(search, tenantCode), HttpStatus.OK);
         }
-        return new ResponseEntity<>(customersService.getCustomers(), HttpStatus.OK);
+        return new ResponseEntity<>(customersService.getCustomers(tenantCode), HttpStatus.OK);
     }
 
     @GetMapping("/{contactNo}")
     @ResponseBody
-    public ResponseEntity<List<CustomerDetailsModel>> getCustomer(@PathVariable String contactNo) {
-        return new ResponseEntity<>(customersService.getCustomer(contactNo), HttpStatus.OK);
+    public ResponseEntity<List<CustomerDetailsModel>> getCustomer(
+            @PathVariable String tenantCode,
+            @PathVariable String contactNo) {
+        return new ResponseEntity<>(customersService.getCustomer(contactNo, tenantCode), HttpStatus.OK);
     }
 
     @PostMapping("")
     @ResponseBody
-    public ResponseEntity<CustomerDetailsModel> createCustomer(@RequestBody CustomerDetailsModel customerDetailsModel) {
+    public ResponseEntity<CustomerDetailsModel> createCustomer(
+            @PathVariable String tenantCode,
+            @RequestBody CustomerDetailsModel customerDetailsModel) {
         try {
-            customerDetailsModel = customersService.createCustomer(customerDetailsModel);
+            customerDetailsModel = customersService.createCustomer(customerDetailsModel, tenantCode);
             return new ResponseEntity<>(customerDetailsModel, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -48,24 +54,27 @@ public class CustomersController {
 
     @PutMapping("")
     @ResponseBody
-    public ResponseEntity<CustomerDetailsModel> updateCustomer(@RequestBody CustomerDetailsModel customerDetailsModel) {
+    public ResponseEntity<CustomerDetailsModel> updateCustomer(
+            @PathVariable String tenantCode,
+            @RequestBody CustomerDetailsModel customerDetailsModel) {
         try {
-            customerDetailsModel = customersService.updateCustomer(customerDetailsModel);
+            customerDetailsModel = customersService.updateCustomer(customerDetailsModel, tenantCode);
             return new ResponseEntity<>(customerDetailsModel, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-
     @GetMapping("/measurements")
     @ResponseBody
-    public ResponseEntity<List<CustomerMeasurementModel>> getMeasurements(@RequestParam(required = false) String search) {
+    public ResponseEntity<List<CustomerMeasurementModel>> getMeasurements(
+            @PathVariable String tenantCode,
+            @RequestParam(required = false) String search) {
         try {
             if (search != null && !search.isEmpty()) {
-                return new ResponseEntity<>(customersService.searchMeasurements(search), HttpStatus.OK);
+                return new ResponseEntity<>(customersService.searchMeasurements(search, tenantCode), HttpStatus.OK);
             }
-            return new ResponseEntity<>(customersService.getMeasurements(), HttpStatus.OK);
+            return new ResponseEntity<>(customersService.getMeasurements(tenantCode), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -73,9 +82,11 @@ public class CustomersController {
 
     @GetMapping("/measurements/{contactNo}")
     @ResponseBody
-    public ResponseEntity<List<CustomerMeasurementModel>> getCustomerMeasurements(@NonNull @PathVariable String contactNo) {
+    public ResponseEntity<List<CustomerMeasurementModel>> getCustomerMeasurements(
+            @PathVariable String tenantCode,
+            @NonNull @PathVariable String contactNo) {
         try {
-            return new ResponseEntity<>(customersService.getCustomerMeasurements(contactNo), HttpStatus.OK);
+            return new ResponseEntity<>(customersService.getCustomerMeasurements(contactNo, tenantCode), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -83,9 +94,11 @@ public class CustomersController {
 
     @PostMapping("/measurements")
     @ResponseBody
-    public ResponseEntity<CustomerMeasurementModel> CreateCustomerMeasurement(@RequestBody CustomerMeasurementModel customerMeasurementModel) {
+    public ResponseEntity<CustomerMeasurementModel> CreateCustomerMeasurement(
+            @PathVariable String tenantCode,
+            @RequestBody CustomerMeasurementModel customerMeasurementModel) {
         try {
-            return new ResponseEntity<>(customersService.createCustomerMeasurement(customerMeasurementModel), HttpStatus.OK);
+            return new ResponseEntity<>(customersService.createCustomerMeasurement(customerMeasurementModel, tenantCode), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -93,9 +106,11 @@ public class CustomersController {
 
     @PutMapping("/measurements")
     @ResponseBody
-    public ResponseEntity<CustomerMeasurementModel> updateCustomerMeasurement(@RequestBody CustomerMeasurementModel customerMeasurementModel) {
+    public ResponseEntity<CustomerMeasurementModel> updateCustomerMeasurement(
+            @PathVariable String tenantCode,
+            @RequestBody CustomerMeasurementModel customerMeasurementModel) {
         try {
-            return new ResponseEntity<>(customersService.updateCustomerMeasurement(customerMeasurementModel), HttpStatus.OK);
+            return new ResponseEntity<>(customersService.updateCustomerMeasurement(customerMeasurementModel, tenantCode), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }

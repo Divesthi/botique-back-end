@@ -14,12 +14,10 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -31,42 +29,43 @@ public class BillsService {
     @Autowired
     private CustomersRepository customersRepository;
 
-    public List<BillModel> getBills() {
-        return billRepository.getBills().stream().map((bill) -> bill.toModel()).toList();
+    public List<BillModel> getBills(String tenantCode) {
+        return billRepository.getBills(tenantCode).stream().map(BillDetails::toModel).toList();
     }
 
-    public List<BillModel> searchBills(String searchTerm) {
+    public List<BillModel> searchBills(String searchTerm, String tenantCode) {
         if (StringUtils.isBlank(searchTerm)) {
-            return getBills();
+            return getBills(tenantCode);
         }
-        return billRepository.searchBills(searchTerm).stream().map((bill) -> bill.toModel()).toList();
+        return billRepository.searchBills(searchTerm, tenantCode).stream().map(BillDetails::toModel).toList();
     }
 
-    public List<BillModel> getBillsByDateRange(OffsetDateTime fromDate, OffsetDateTime toDate) {
-        return billRepository.getBillsByDateRange(fromDate, toDate).stream().map(BillDetails::toModel).toList();
+    public List<BillModel> getBillsByDateRange(OffsetDateTime fromDate, OffsetDateTime toDate, String tenantCode) {
+        return billRepository.getBillsByDateRange(fromDate, toDate, tenantCode).stream().map(BillDetails::toModel).toList();
     }
 
-    public List<BillModel> searchBillsWithDateRange(String searchTerm, OffsetDateTime fromDate, OffsetDateTime toDate) {
+    public List<BillModel> searchBillsWithDateRange(String searchTerm, OffsetDateTime fromDate, OffsetDateTime toDate, String tenantCode) {
         List<BillDetails> bills;
         if (StringUtils.isBlank(searchTerm)) {
-            bills = billRepository.getBillsByDateRange(fromDate, toDate);
+            bills = billRepository.getBillsByDateRange(fromDate, toDate, tenantCode);
         } else {
-            bills = billRepository.searchBillsWithDateRange(searchTerm, fromDate, toDate);
+            bills = billRepository.searchBillsWithDateRange(searchTerm, fromDate, toDate, tenantCode);
         }
         return bills.stream().map(BillDetails::toModel).toList();
     }
 
     @Transactional
-    public void createBill(BillModel billModel) {
+    public void createBill(BillModel billModel, String tenantCode) {
         try {
-            CustomerDetails customerDetails = customersRepository.getCustomerDetailsByMobileNumber(billModel.getMobileNo());
+            CustomerDetails customerDetails = customersRepository.getCustomerDetailsByMobileNumber(
+                    billModel.getMobileNo(), tenantCode);
             List<OrderModel> orderModels = billModel.getOrders();
             if (orderModels == null || orderModels.isEmpty()) {
                 log.error("No orders associated with the given bill.");
                 throw new RuntimeException("No orders associated with the given bill");
             } else {
                 List<Long> orderIds = orderModels.stream().map(OrderModel::getId).toList();
-                List<OrderDetails> orders = ordersRepository.getOrdersByIds(orderIds);
+                List<OrderDetails> orders = ordersRepository.getOrdersByIds(orderIds, tenantCode);
                 if (orderModels.size() != orders.size()) {
                     log.error("One of the given orders doesn't exists in the system. Provided Order ids - {}",
                             orderIds);
@@ -89,9 +88,9 @@ public class BillsService {
         }
     }
 
-    public BillModel updateBill(BillModel billModel) {
+    public BillModel updateBill(BillModel billModel, String tenantCode) {
         try {
-            BillDetails billDetails = billRepository.getBillById(billModel.getId());
+            BillDetails billDetails = billRepository.getBillById(billModel.getId(), tenantCode);
             if (billModel.getStatus() != null) {
                 billDetails.setStatus(billModel.getStatus());
             }

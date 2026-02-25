@@ -22,6 +22,7 @@ public class OrderModel {
     private Double advance;
     private Double balance;
     private String mobileNo;
+    private String tenantCode;
     private String estimateAmount;
     private List<OrderItemModel> orderItems;
 }

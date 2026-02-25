@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -47,10 +46,16 @@ public class BillDetails extends BaseEntity implements Serializable {
     @Column(name = "remarks")
     private String remarks;
 
+    @Column(name = "tenant_code", insertable = false, updatable = false)
+    private String tenantCode;
+
     @OneToOne(
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL)
-    @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no")
+    @JoinColumns({
+            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no"),
+            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code")
+    })
     private CustomerDetails customerDetails;
 
     @OneToMany(
@@ -84,9 +89,9 @@ public class BillDetails extends BaseEntity implements Serializable {
                 .discount(discount)
                 .createdDate(createdDate)
                 .mobileNo(customerDetails.getMobileNo())
+                .tenantCode(customerDetails.getTenantCode())
                 .orders(orders)
                 .remarks(remarks)
                 .build();
     }
-
 }

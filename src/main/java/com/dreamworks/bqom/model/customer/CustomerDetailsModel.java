@@ -15,6 +15,6 @@ public class CustomerDetailsModel {
     private String mobileNo;
     private String address;
     private String alternateContactNo;
-    private String tenantId;
+    private String tenantCode;
     private OffsetDateTime creationDate;
 }

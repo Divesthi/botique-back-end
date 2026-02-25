@@ -11,6 +11,7 @@ import java.util.Map;
 public class CustomerMeasurementModel {
     private Long id;
     private String mobileNo;
+    private String tenantCode;
     private String dressType;
     private String remarks;
     private String name;

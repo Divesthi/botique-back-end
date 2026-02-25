@@ -14,33 +14,41 @@ import java.util.List;
 @Repository
 public interface BillRepository extends JpaRepository<BaseEntity, Long> {
 
-    @Query("select bd from BillDetails bd")
-    List<BillDetails> getBills();
+    @Query("select bd from BillDetails bd where bd.customerDetails.tenantCode = :tenantCode")
+    List<BillDetails> getBills(@Param("tenantCode") String tenantCode);
 
-    @Query("select bd from BillDetails bd where bd.id = :billId")
-    BillDetails getBillById(@Param("billId") Long billId);
+    @Query("select bd from BillDetails bd where bd.id = :billId and bd.customerDetails.tenantCode = :tenantCode")
+    BillDetails getBillById(@Param("billId") Long billId, @Param("tenantCode") String tenantCode);
 
-    @Query("select bd from BillDetails bd where bd.customerDetails.mobileNo = :mobileNo")
-    List<BillDetails> getBillsByMobileNumber(@Param("mobileNo") String mobileNo);
+    @Query("select bd from BillDetails bd where bd.customerDetails.mobileNo = :mobileNo and bd.customerDetails.tenantCode = :tenantCode")
+    List<BillDetails> getBillsByMobileNumber(@Param("mobileNo") String mobileNo,
+                                             @Param("tenantCode") String tenantCode);
 
-    @Query("select boa.orderDetails from BillOrdersAssociation boa where boa.billDetails.id = :billId")
-    List<OrderDetails> getOrdersForBillId(@Param("billId") String billId);
-
-    @Query("select bd from BillDetails bd where " +
-           "lower(bd.customerDetails.name) like lower(concat('%', :searchTerm, '%')) or " +
-           "bd.customerDetails.mobileNo like concat('%', :searchTerm, '%') or " +
-           "cast(bd.id as string) like concat('%', :searchTerm, '%')")
-    List<BillDetails> searchBills(@Param("searchTerm") String searchTerm);
-
-    @Query("select bd from BillDetails bd where bd.createdDate >= :fromDate and bd.createdDate <= :toDate")
-    List<BillDetails> getBillsByDateRange(@Param("fromDate") OffsetDateTime fromDate, @Param("toDate") OffsetDateTime toDate);
+    @Query("select boa.orderDetails from BillOrdersAssociation boa where boa.billDetails.id = :billId and boa.customerDetails.tenantCode = :tenantCode")
+    List<OrderDetails> getOrdersForBillId(@Param("billId") String billId,
+                                          @Param("tenantCode") String tenantCode);
 
     @Query("select bd from BillDetails bd where " +
            "(lower(bd.customerDetails.name) like lower(concat('%', :searchTerm, '%')) or " +
            "bd.customerDetails.mobileNo like concat('%', :searchTerm, '%') or " +
            "cast(bd.id as string) like concat('%', :searchTerm, '%')) and " +
-           "bd.createdDate >= :fromDate and bd.createdDate <= :toDate")
+           "bd.customerDetails.tenantCode = :tenantCode")
+    List<BillDetails> searchBills(@Param("searchTerm") String searchTerm,
+                                   @Param("tenantCode") String tenantCode);
+
+    @Query("select bd from BillDetails bd where bd.createdDate >= :fromDate and bd.createdDate <= :toDate and bd.customerDetails.tenantCode = :tenantCode")
+    List<BillDetails> getBillsByDateRange(@Param("fromDate") OffsetDateTime fromDate,
+                                          @Param("toDate") OffsetDateTime toDate,
+                                          @Param("tenantCode") String tenantCode);
+
+    @Query("select bd from BillDetails bd where " +
+           "(lower(bd.customerDetails.name) like lower(concat('%', :searchTerm, '%')) or " +
+           "bd.customerDetails.mobileNo like concat('%', :searchTerm, '%') or " +
+           "cast(bd.id as string) like concat('%', :searchTerm, '%')) and " +
+           "bd.createdDate >= :fromDate and bd.createdDate <= :toDate and " +
+           "bd.customerDetails.tenantCode = :tenantCode")
     List<BillDetails> searchBillsWithDateRange(@Param("searchTerm") String searchTerm,
                                                 @Param("fromDate") OffsetDateTime fromDate,
-                                                @Param("toDate") OffsetDateTime toDate);
+                                                @Param("toDate") OffsetDateTime toDate,
+                                                @Param("tenantCode") String tenantCode);
 }

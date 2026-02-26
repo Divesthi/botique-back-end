@@ -1,9 +1,7 @@
 package com.dreamworks.bqom.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
@@ -37,9 +35,6 @@ public class DatabaseBackupService {
 
     @Value("${backup.pgdump.path:pg_dump}")
     private String pgdumpPath;
-
-    @Autowired
-    private GoogleDriveService googleDriveService;
 
     private String dbName;
     private String dbHost;
@@ -85,73 +80,67 @@ public class DatabaseBackupService {
     }
 
     /**
-     * Performs the database backup using mysqldump
+     * Performs the database backup using pg_dump
      * @return true if backup was successful, false otherwise
      */
     public boolean performBackup() {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String backupFileName = String.format("bqom_backup_%s.sql", timestamp);
-        String backupFilePath = Paths.get(backupDirectory, backupFileName).toString();
-
-        try {
-            log.info("Creating database backup: {}", backupFilePath);
-
-            // Build pg_dump command
-            ProcessBuilder processBuilder = new ProcessBuilder(
-                    pgdumpPath,
-                    "-h", dbHost,
-                    "-p", dbPort,
-                    "-U", dbUsername,
-                    "-F", "p",
-                    "--clean",
-                    dbName
-            );
-            processBuilder.environment().put("PGPASSWORD", dbPassword);
-
-            // Redirect output to backup file
-            File backupFile = new File(backupFilePath);
-            processBuilder.redirectOutput(backupFile);
-            processBuilder.redirectErrorStream(false);
-
-            // Execute the backup
-            Process process = processBuilder.start();
-
-            // Capture any errors
-            StringBuilder errorOutput = new StringBuilder();
-            try (BufferedReader errorReader = new BufferedReader(
-                    new InputStreamReader(process.getErrorStream()))) {
-                String line;
-                while ((line = errorReader.readLine()) != null) {
-                    errorOutput.append(line).append("\n");
-                }
-            }
-
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0) {
-                long fileSize = Files.size(Paths.get(backupFilePath));
-                log.info("Database backup completed successfully: {} (Size: {} bytes)",
-                        backupFilePath, fileSize);
-
-                // Upload backup to Google Drive
-                googleDriveService.uploadBackup(backupFile);
-
-                // Clean up old local and Drive backups
-                cleanupOldBackups();
-                googleDriveService.cleanupOldDriveBackups(retentionDays);
-                return true;
-            } else {
-                log.error("Database backup failed with exit code: {}. Error: {}",
-                        exitCode, errorOutput.toString());
-                // Delete failed backup file if it exists
-                Files.deleteIfExists(Paths.get(backupFilePath));
-                return false;
-            }
-
-        } catch (Exception e) {
-            log.error("Error during database backup", e);
-            return false;
-        }
+//        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+//        String backupFileName = String.format("bqom_backup_%s.sql", timestamp);
+//        String backupFilePath = Paths.get(backupDirectory, backupFileName).toString();
+//
+//        try {
+//            log.info("Creating database backup: {}", backupFilePath);
+//
+//            // Build pg_dump command
+//            ProcessBuilder processBuilder = new ProcessBuilder(
+//                    pgdumpPath,
+//                    "-h", dbHost,
+//                    "-p", dbPort,
+//                    "-U", dbUsername,
+//                    "-F", "p",
+//                    "--clean",
+//                    dbName
+//            );
+//            processBuilder.environment().put("PGPASSWORD", dbPassword);
+//
+//            // Redirect output to backup file
+//            File backupFile = new File(backupFilePath);
+//            processBuilder.redirectOutput(backupFile);
+//            processBuilder.redirectErrorStream(false);
+//
+//            // Execute the backup
+//            Process process = processBuilder.start();
+//
+//            // Capture any errors
+//            StringBuilder errorOutput = new StringBuilder();
+//            try (BufferedReader errorReader = new BufferedReader(
+//                    new InputStreamReader(process.getErrorStream()))) {
+//                String line;
+//                while ((line = errorReader.readLine()) != null) {
+//                    errorOutput.append(line).append("\n");
+//                }
+//            }
+//
+//            int exitCode = process.waitFor();
+//
+//            if (exitCode == 0) {
+//                long fileSize = Files.size(Paths.get(backupFilePath));
+//                log.info("Database backup completed successfully: {} (Size: {} bytes)",
+//                        backupFilePath, fileSize);
+//                cleanupOldBackups();
+//                return true;
+//            } else {
+//                log.error("Database backup failed with exit code: {}. Error: {}",
+//                        exitCode, errorOutput.toString());
+//                Files.deleteIfExists(Paths.get(backupFilePath));
+//                return false;
+//            }
+//
+//        } catch (Exception e) {
+//            log.error("Error during database backup", e);
+//            return false;
+//        }
+        return false;
     }
 
     /**

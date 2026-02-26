@@ -78,7 +78,7 @@ public class DatabaseBackupService {
      * 0 0 2 * * * = At 02:00:00 every day
      * Zone set to Asia/Kolkata for IST
      */
-    @Scheduled(cron = "0 0 2 * * *", zone = "Asia/Kolkata")
+    //@Scheduled(cron = "0 0 2 * * *", zone = "Asia/Kolkata")
     public void performScheduledBackup() {
         log.info("Starting scheduled database backup at 2:00 AM IST");
         performBackup();

@@ -1,6 +1,7 @@
 package com.dreamworks.bqom.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,9 @@ public class DatabaseBackupService {
 
     @Value("${backup.pgdump.path:pg_dump}")
     private String pgdumpPath;
+
+    @Autowired
+    private GoogleDriveService googleDriveService;
 
     private String dbName;
     private String dbHost;
@@ -129,8 +133,12 @@ public class DatabaseBackupService {
                 log.info("Database backup completed successfully: {} (Size: {} bytes)",
                         backupFilePath, fileSize);
 
-                // Clean up old backups
+                // Upload backup to Google Drive
+                googleDriveService.uploadBackup(backupFile);
+
+                // Clean up old local and Drive backups
                 cleanupOldBackups();
+                googleDriveService.cleanupOldDriveBackups(retentionDays);
                 return true;
             } else {
                 log.error("Database backup failed with exit code: {}. Error: {}",

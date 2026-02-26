@@ -23,6 +23,7 @@ public class BillsController {
 
     @GetMapping("")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<List<BillModel>> getBills(
             @PathVariable String tenantCode,
             @RequestParam(required = false) String search,
@@ -50,6 +51,7 @@ public class BillsController {
 
     @PostMapping("")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity createBill(
             @PathVariable String tenantCode,
             @RequestBody BillModel billModel) {
@@ -59,6 +61,7 @@ public class BillsController {
 
     @PutMapping("")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<BillModel> updateBill(
             @PathVariable String tenantCode,
             @RequestBody BillModel billModel) {

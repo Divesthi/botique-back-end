@@ -28,6 +28,7 @@ public class BackupController {
      * Trigger a manual database backup
      */
     @PostMapping("/create")
+    @CrossOrigin
     public ResponseEntity<Map<String, Object>> createBackup() {
         log.info("Manual backup triggered via API");
         Map<String, Object> response = new HashMap<>();
@@ -49,6 +50,7 @@ public class BackupController {
      * List all available backup files
      */
     @GetMapping("/list")
+    @CrossOrigin
     public ResponseEntity<Map<String, Object>> listBackups() {
         Map<String, Object> response = new HashMap<>();
 
@@ -66,6 +68,7 @@ public class BackupController {
      * @param fileName name of the backup file to restore
      */
     @PostMapping("/restore/{fileName}")
+    @CrossOrigin
     public ResponseEntity<Map<String, Object>> restoreBackup(@PathVariable String fileName) {
         log.info("Database restore triggered via API for file: {}", fileName);
         Map<String, Object> response = new HashMap<>();
@@ -95,6 +98,7 @@ public class BackupController {
      * Get backup status and configuration
      */
     @GetMapping("/status")
+    @CrossOrigin
     public ResponseEntity<Map<String, Object>> getBackupStatus() {
         Map<String, Object> response = new HashMap<>();
 

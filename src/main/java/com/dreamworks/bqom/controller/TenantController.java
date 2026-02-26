@@ -18,21 +18,25 @@ public class TenantController {
     private TenantService tenantService;
 
     @GetMapping("")
+    @CrossOrigin
     public ResponseEntity<List<TenantModel>> getTenants() {
         return new ResponseEntity<>(tenantService.getTenants(), HttpStatus.OK);
     }
 
     @GetMapping("/{code}")
+    @CrossOrigin
     public ResponseEntity<TenantModel> getTenant(@PathVariable String code) {
         return new ResponseEntity<>(tenantService.getTenant(code), HttpStatus.OK);
     }
 
     @PostMapping("")
+    @CrossOrigin
     public ResponseEntity<TenantModel> createTenant(@RequestBody TenantModel model) {
         return new ResponseEntity<>(tenantService.createTenant(model), HttpStatus.CREATED);
     }
 
     @PutMapping("")
+    @CrossOrigin
     public ResponseEntity<TenantModel> updateTenant(@RequestBody TenantModel model) {
         return new ResponseEntity<>(tenantService.updateTenant(model), HttpStatus.OK);
     }

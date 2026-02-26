@@ -22,6 +22,7 @@ public class CustomersController {
 
     @GetMapping("")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<List<CustomerDetailsModel>> getCustomers(
             @PathVariable String tenantCode,
             @RequestParam(required = false) String search) {
@@ -33,6 +34,7 @@ public class CustomersController {
 
     @GetMapping("/{contactNo}")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<List<CustomerDetailsModel>> getCustomer(
             @PathVariable String tenantCode,
             @PathVariable String contactNo) {
@@ -41,6 +43,7 @@ public class CustomersController {
 
     @PostMapping("")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<CustomerDetailsModel> createCustomer(
             @PathVariable String tenantCode,
             @RequestBody CustomerDetailsModel customerDetailsModel) {
@@ -54,6 +57,7 @@ public class CustomersController {
 
     @PutMapping("")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<CustomerDetailsModel> updateCustomer(
             @PathVariable String tenantCode,
             @RequestBody CustomerDetailsModel customerDetailsModel) {
@@ -67,6 +71,7 @@ public class CustomersController {
 
     @GetMapping("/measurements")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<List<CustomerMeasurementModel>> getMeasurements(
             @PathVariable String tenantCode,
             @RequestParam(required = false) String search) {
@@ -82,6 +87,7 @@ public class CustomersController {
 
     @GetMapping("/measurements/{contactNo}")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<List<CustomerMeasurementModel>> getCustomerMeasurements(
             @PathVariable String tenantCode,
             @NonNull @PathVariable String contactNo) {
@@ -94,6 +100,7 @@ public class CustomersController {
 
     @PostMapping("/measurements")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<CustomerMeasurementModel> CreateCustomerMeasurement(
             @PathVariable String tenantCode,
             @RequestBody CustomerMeasurementModel customerMeasurementModel) {
@@ -106,6 +113,7 @@ public class CustomersController {
 
     @PutMapping("/measurements")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<CustomerMeasurementModel> updateCustomerMeasurement(
             @PathVariable String tenantCode,
             @RequestBody CustomerMeasurementModel customerMeasurementModel) {

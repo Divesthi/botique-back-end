@@ -22,6 +22,7 @@ public class OrdersController {
 
     @GetMapping("")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<List<OrderModel>> getOrders(
             @PathVariable String tenantCode,
             @RequestParam(required = false) String search,
@@ -49,6 +50,7 @@ public class OrdersController {
 
     @PostMapping("")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity createOrder(
             @PathVariable String tenantCode,
             @RequestBody OrderModel orderModel) {
@@ -58,6 +60,7 @@ public class OrdersController {
 
     @PutMapping("")
     @ResponseBody
+    @CrossOrigin
     public ResponseEntity<OrderModel> updateOrder(
             @PathVariable String tenantCode,
             @RequestBody OrderModel orderModel) {

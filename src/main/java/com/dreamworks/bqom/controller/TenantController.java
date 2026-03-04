@@ -1,6 +1,8 @@
 package com.dreamworks.bqom.controller;
 
 import com.dreamworks.bqom.model.TenantModel;
+import com.dreamworks.bqom.repository.enums.UserRole;
+import com.dreamworks.bqom.security.RequireRole;
 import com.dreamworks.bqom.service.TenantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,12 +33,14 @@ public class TenantController {
 
     @PostMapping("")
     @CrossOrigin
+    @RequireRole(UserRole.TENANT_ADMIN)
     public ResponseEntity<TenantModel> createTenant(@RequestBody TenantModel model) {
         return new ResponseEntity<>(tenantService.createTenant(model), HttpStatus.CREATED);
     }
 
     @PutMapping("")
     @CrossOrigin
+    @RequireRole(UserRole.TENANT_ADMIN)
     public ResponseEntity<TenantModel> updateTenant(@RequestBody TenantModel model) {
         return new ResponseEntity<>(tenantService.updateTenant(model), HttpStatus.OK);
     }

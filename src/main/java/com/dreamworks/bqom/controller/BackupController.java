@@ -1,5 +1,7 @@
 package com.dreamworks.bqom.controller;
 
+import com.dreamworks.bqom.repository.enums.UserRole;
+import com.dreamworks.bqom.security.RequireRole;
 import com.dreamworks.bqom.service.DatabaseBackupService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping(path = "/v1/bqom/backup", produces = "application/json")
 @CrossOrigin(origins = "*")
+@RequireRole(UserRole.TENANT_ADMIN)
 @Slf4j
 public class BackupController {
 
@@ -65,6 +68,7 @@ public class BackupController {
 
     /**
      * Restore database from a specific backup file
+     * 
      * @param fileName name of the backup file to restore
      */
     @PostMapping("/restore/{fileName}")

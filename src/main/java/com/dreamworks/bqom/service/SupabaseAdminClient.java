@@ -130,6 +130,43 @@ public class SupabaseAdminClient {
         }
     }
 
+    /**
+     * Get a user's Supabase UUID by their email address.
+     *
+     * @param email User's email address
+     * @return The Supabase user UUID (id)
+     */
+    public String getSupabaseUidByEmail(String email) {
+        String url = supabaseUrl + "/auth/v1/admin/users";
+
+        HttpHeaders headers = buildHeaders();
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                JsonNode responseJson = objectMapper.readTree(response.getBody());
+                JsonNode usersNode = responseJson.has("users") ? responseJson.get("users") : responseJson;
+
+                if (usersNode != null && usersNode.isArray()) {
+                    for (JsonNode userNode : usersNode) {
+                        JsonNode emailNode = userNode.get("email");
+                        if (emailNode != null && email.equalsIgnoreCase(emailNode.asText())) {
+                            return userNode.get("id").asText();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch users from Supabase", e);
+            throw new RuntimeException("Failed to query Supabase for user: " + e.getMessage());
+        }
+
+        throw new RuntimeException(
+                "User with email " + email + " not found in Supabase. Please create them in Supabase first.");
+    }
+
     private HttpHeaders buildHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

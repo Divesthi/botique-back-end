@@ -30,9 +30,8 @@ public class AuthService {
      * - PLATFORM_ADMIN can register users for any tenant (must provide tenantCode)
      * - TENANT_ADMIN can only register users for their own tenant
      * This method:
-     * 1. Creates the user in Supabase Auth (via Admin API)
+     * 1. Finds the user in Supabase Auth via Admin API
      * 2. Saves the user in the local tenant_users table
-     * 3. Sends an invite email so the user can set their password
      */
     public TenantUserModel registerUser(TenantUserModel model, AuthenticatedUser currentUser) {
         // Validate tenant exists
@@ -47,11 +46,11 @@ public class AuthService {
 
         // Check if user already exists in our DB
         tenantUserRepository.findByEmail(model.getEmail()).ifPresent(u -> {
-            throw new RuntimeException("User with email " + model.getEmail() + " already exists.");
+            throw new RuntimeException("User with email " + model.getEmail() + " already exists in the system.");
         });
 
-        // Step 1: Create user in Supabase Auth
-        String supabaseUid = supabaseAdminClient.createUser(model.getEmail(), model.getDisplayName());
+        // Step 1: Find user in Supabase Auth by email
+        String supabaseUid = supabaseAdminClient.getSupabaseUidByEmail(model.getEmail());
 
         try {
             // Step 2: Save in our local DB
@@ -59,6 +58,7 @@ public class AuthService {
                     .supabaseUid(supabaseUid)
                     .email(model.getEmail())
                     .displayName(model.getDisplayName())
+                    .phoneNumber(model.getPhoneNumber())
                     .tenantCode(model.getTenantCode())
                     .role(model.getRole() != null ? model.getRole() : UserRole.TENANT_USER)
                     .active(true)
@@ -68,15 +68,9 @@ public class AuthService {
             log.info("User registered: {} for tenant: {} with role: {} (supabase_uid: {})",
                     user.getEmail(), user.getTenantCode(), user.getRole(), supabaseUid);
 
-            // Step 3: Send invite email so user can set their password
-            supabaseAdminClient.inviteUser(model.getEmail());
-
             return toModel(user);
 
         } catch (Exception e) {
-            // Rollback: delete the Supabase user if local save fails
-            log.error("Failed to save user locally, rolling back Supabase user: {}", supabaseUid, e);
-            supabaseAdminClient.deleteUser(supabaseUid);
             throw new RuntimeException("Failed to register user: " + e.getMessage());
         }
     }
@@ -168,12 +162,21 @@ public class AuthService {
     }
 
     private TenantUserModel toModel(TenantUser user) {
+        String tenantName = null;
+        if (user.getTenantCode() != null && !user.getTenantCode().isBlank()) {
+            tenantName = tenantRepository.findByCode(user.getTenantCode().trim())
+                    .map(t -> t.getName())
+                    .orElse(null);
+        }
+
         return TenantUserModel.builder()
                 .id(user.getId())
                 .supabaseUid(user.getSupabaseUid())
                 .email(user.getEmail())
                 .displayName(user.getDisplayName())
+                .phoneNumber(user.getPhoneNumber())
                 .tenantCode(user.getTenantCode())
+                .tenantName(tenantName)
                 .role(user.getRole())
                 .active(user.getActive())
                 .createdAt(user.getCreatedAt())

@@ -2,6 +2,7 @@ package com.dreamworks.bqom.config;
 
 import com.dreamworks.bqom.security.SupabaseJwtAuthenticationFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,16 +23,17 @@ import java.util.Map;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final SupabaseJwtAuthenticationFilter jwtFilter;
-    private final ObjectMapper objectMapper;
-
-    public SecurityConfig(SupabaseJwtAuthenticationFilter jwtFilter, ObjectMapper objectMapper) {
-        this.jwtFilter = jwtFilter;
-        this.objectMapper = objectMapper;
+    @Bean
+    public FilterRegistrationBean<SupabaseJwtAuthenticationFilter> jwtFilterRegistration(
+            SupabaseJwtAuthenticationFilter filter) {
+        FilterRegistrationBean<SupabaseJwtAuthenticationFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, SupabaseJwtAuthenticationFilter jwtFilter,
+            ObjectMapper objectMapper) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -40,10 +42,11 @@ public class SecurityConfig {
                         // Public endpoints (no auth required)
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/v1/bqom/health").permitAll()
+                        .requestMatchers("/v1/bqom/auth/**").permitAll() // Allow filter/interceptor to handle
                         // All other endpoints require authentication
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex
+                .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(401);
                             response.setContentType("application/json");
@@ -64,7 +67,6 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

@@ -65,8 +65,10 @@ public class SupabaseJwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+        log.info("Request URI: {}, Auth Header present: {}", request.getRequestURI(), authHeader != null);
 
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            log.info("No Bearer token found in request to {}", request.getRequestURI());
             filterChain.doFilter(request, response);
             return;
         }

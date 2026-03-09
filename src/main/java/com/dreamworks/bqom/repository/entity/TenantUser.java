@@ -32,6 +32,9 @@ public class TenantUser {
     @Column(name = "tenant_code", nullable = false)
     private String tenantCode;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private UserRole role;

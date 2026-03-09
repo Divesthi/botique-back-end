@@ -19,6 +19,8 @@ public class TenantUserModel {
     private String email;
     private String displayName;
     private String tenantCode;
+    private String tenantName;
+    private String phoneNumber;
     private UserRole role;
     private Boolean active;
     private LocalDateTime createdAt;

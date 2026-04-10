@@ -22,25 +22,19 @@ public class BillOrdersAssociation extends BaseEntity implements Serializable {
     @Column(name = "tenant_code", insertable = false, updatable = false)
     private String tenantCode;
 
-    @OneToOne(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumns({
-            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no"),
-            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code")
+            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no", updatable = false),
+            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code", updatable = false)
     })
     private CustomerDetails customerDetails;
 
-    @OneToOne(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
-    @JoinColumn(name = "bill_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "bill_id", referencedColumnName = "id", updatable = false)
     private BillDetails billDetails;
 
-    @OneToOne(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
-    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "order_id", referencedColumnName = "id", updatable = false)
     private OrderDetails orderDetails;
 
     public static BillOrdersAssociation toEntity(BillDetails billDetails, OrderDetails orderDetails,

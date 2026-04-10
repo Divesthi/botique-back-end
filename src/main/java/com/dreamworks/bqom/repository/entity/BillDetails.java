@@ -53,19 +53,17 @@ public class BillDetails extends BaseEntity implements Serializable {
     private String tenantCode;
 
     @OneToOne(
-            fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
+            fetch = FetchType.EAGER)
     @JoinColumns({
-            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no"),
-            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code")
+            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no", updatable = false),
+            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code", updatable = false)
     })
     private CustomerDetails customerDetails;
 
     @OneToMany(
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL
+            mappedBy = "billDetails"
     )
-    @JoinColumn(name = "bill_id", referencedColumnName = "id")
     private List<BillOrdersAssociation> ordersAssociations;
 
     public static BillDetails toEntity(BillModel model, CustomerDetails customerDetails) {

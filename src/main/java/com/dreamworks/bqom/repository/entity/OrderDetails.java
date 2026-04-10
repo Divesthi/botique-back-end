@@ -66,8 +66,8 @@ public class OrderDetails extends BaseEntity implements Serializable {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumns({
-            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no"),
-            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code")
+            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no", updatable = false),
+            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code", updatable = false)
     })
     private CustomerDetails customerDetails;
 

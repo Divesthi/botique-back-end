@@ -73,7 +73,8 @@ public class BillsService {
                 }
                 BillDetails billDetails = BillDetails.toEntity(billModel, customerDetails);
                 billDetails.setCreatedDate(OffsetDateTime.now());
-                billDetails.setStatus(BillStatus.fresh);
+                billDetails.setUpdatedDate(OffsetDateTime.now());
+                billDetails.setStatus(billModel.getStatus() != null ? billModel.getStatus() : BillStatus.fresh);
                 BillDetails bill = billRepository.save(billDetails);
                 log.info("Bill created successfully for the customer - {}", billModel.getMobileNo());
                 List<BillOrdersAssociation> billOrdersAssociations = orders.stream().map((order) ->
@@ -86,6 +87,17 @@ public class BillsService {
             log.error("Error while creating the bill for the customer - {}", billModel.getMobileNo());
             throw e;
         }
+    }
+
+    @Transactional
+    public void deleteBill(Long billId, String tenantCode) {
+        BillDetails billDetails = billRepository.getBillById(billId, tenantCode);
+        if (billDetails == null) {
+            throw new RuntimeException("Bill not found");
+        }
+        billRepository.deleteAll(billRepository.getBillOrdersAssociationsByBillId(billId));
+        billRepository.delete(billDetails);
+        log.info("Bill {} deleted successfully", billId);
     }
 
     public BillModel updateBill(BillModel billModel, String tenantCode) {
@@ -109,6 +121,7 @@ public class BillsService {
             if (!StringUtils.isEmpty(billModel.getRemarks())) {
                 billDetails.setRemarks(billModel.getRemarks());
             }
+            billDetails.setUpdatedDate(OffsetDateTime.now());
             billDetails = billRepository.save(billDetails);
             return billDetails.toModel();
         } catch (Exception e) {

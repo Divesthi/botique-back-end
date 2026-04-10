@@ -34,6 +34,7 @@ public class CustomersService {
                 .mobileNo(customer.getMobileNo())
                 .tenantCode(customer.getTenantCode())
                 .creationDate(customer.getCreationDate())
+                .updatedDate(customer.getUpdatedDate())
                 .build()).toList();
     }
 
@@ -50,6 +51,7 @@ public class CustomersService {
                 .mobileNo(customer.getMobileNo())
                 .tenantCode(customer.getTenantCode())
                 .creationDate(customer.getCreationDate())
+                .updatedDate(customer.getUpdatedDate())
                 .build()).toList();
     }
 
@@ -72,6 +74,7 @@ public class CustomersService {
             customerDetailsModel.setTenantCode(tenantCode);
             CustomerDetails customerDetails = CustomerDetails.toEntity(customerDetailsModel);
             customerDetails.setCreationDate(OffsetDateTime.now());
+            customerDetails.setUpdatedDate(OffsetDateTime.now());
             CustomerDetails customerDetail = customersRepository.save(customerDetails);
             customerDetailsModel.setId(customerDetail.getId());
             customerDetailsModel.setCreationDate(customerDetail.getCreationDate());
@@ -90,6 +93,7 @@ public class CustomersService {
                 customerDetails.setName(customerDetailsModel.getName());
                 customerDetails.setAddress(customerDetailsModel.getAddress());
                 customerDetails.setAlternateContactNo(customerDetailsModel.getAlternateContactNo());
+                customerDetails.setUpdatedDate(OffsetDateTime.now());
                 customersRepository.save(customerDetails);
             } else {
                 log.error("Customer with the given contact number - {} doesn't exists", customerDetailsModel.getMobileNo());
@@ -116,6 +120,7 @@ public class CustomersService {
                                         .mobileNo(customerMeasurement.getCustomerDetails().getMobileNo())
                                         .tenantCode(customerMeasurement.getCustomerDetails().getTenantCode())
                                         .creationDate(customerMeasurement.getCreationDate())
+                                        .updatedDate(customerMeasurement.getUpdatedDate())
                                         .id(customerMeasurement.getId())
                                         .build()).toList();
         } catch (Exception e) {
@@ -191,6 +196,7 @@ public class CustomersService {
                     measurementModel.getMobileNo(), tenantCode);
             CustomerMeasurementDetails customerMeasurementDetails = CustomerMeasurementDetails.toEntity(measurementModel, customerDetails);
             customerMeasurementDetails.setCreationDate(OffsetDateTime.now());
+            customerMeasurementDetails.setUpdatedDate(OffsetDateTime.now());
             customerMeasurementDetails = customerMeasurementRepository.save(customerMeasurementDetails);
             measurementModel = customerMeasurementDetails.toModel();
         } catch (Exception e) {
@@ -198,6 +204,27 @@ public class CustomersService {
             throw e;
         }
         return measurementModel;
+    }
+
+    public void deleteCustomer(Long customerId, String tenantCode) {
+        Optional<CustomerDetails> customerOpt = customersRepository.findById(customerId);
+        if (customerOpt.isEmpty() || !customerOpt.get().getTenantCode().equals(tenantCode)) {
+            throw new RuntimeException("Customer not found");
+        }
+        try {
+            customersRepository.deleteById(customerId);
+        } catch (Exception e) {
+            log.error("Cannot delete customer {} - likely has linked orders or measurements", customerId, e);
+            throw new RuntimeException("Cannot delete customer with existing orders, measurements, or bills");
+        }
+    }
+
+    public void deleteMeasurement(Long measurementId, String tenantCode) {
+        Optional<CustomerMeasurementDetails> measurementOpt = customerMeasurementRepository.findById(measurementId);
+        if (measurementOpt.isEmpty() || !measurementOpt.get().getCustomerDetails().getTenantCode().equals(tenantCode)) {
+            throw new RuntimeException("Measurement not found");
+        }
+        customerMeasurementRepository.deleteById(measurementId);
     }
 
     public CustomerMeasurementModel updateCustomerMeasurement(CustomerMeasurementModel measurementModel, String tenantCode) {
@@ -208,7 +235,7 @@ public class CustomersService {
                 details.setName(measurementModel.getName());
                 details.setMeasurement(measurementModel.getMeasurement());
                 details.setRemarks(measurementModel.getRemarks());
-                details.setCreationDate(OffsetDateTime.now());
+                details.setUpdatedDate(OffsetDateTime.now());
                 // NOTE: Dress Type is not allowed for changing
                 //details.setDressType(measurementModel.getDressType());
                 details = customerMeasurementRepository.save(details);

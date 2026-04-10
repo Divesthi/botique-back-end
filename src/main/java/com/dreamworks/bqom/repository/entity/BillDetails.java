@@ -46,6 +46,9 @@ public class BillDetails extends BaseEntity implements Serializable {
     @Column(name = "remarks")
     private String remarks;
 
+    @Column(name = "updated_date")
+    private OffsetDateTime updatedDate;
+
     @Column(name = "tenant_code", insertable = false, updatable = false)
     private String tenantCode;
 
@@ -88,6 +91,7 @@ public class BillDetails extends BaseEntity implements Serializable {
                 .status(status)
                 .discount(discount)
                 .createdDate(createdDate)
+                .updatedDate(updatedDate)
                 .mobileNo(customerDetails.getMobileNo())
                 .tenantCode(customerDetails.getTenantCode())
                 .orders(orders)

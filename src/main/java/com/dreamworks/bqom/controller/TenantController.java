@@ -27,7 +27,7 @@ public class TenantController {
 
     @GetMapping("/{code}")
     @CrossOrigin
-    public ResponseEntity<TenantModel> getTenant(@PathVariable String code) {
+    public ResponseEntity<TenantModel> getTenant(@PathVariable("code") String code) {
         return new ResponseEntity<>(tenantService.getTenant(code), HttpStatus.OK);
     }
 

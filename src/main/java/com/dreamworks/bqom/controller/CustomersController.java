@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/v1/bqom/tenants/{tenantCode}/customers", produces = "application/json")
@@ -24,8 +25,8 @@ public class CustomersController {
     @ResponseBody
     @CrossOrigin
     public ResponseEntity<List<CustomerDetailsModel>> getCustomers(
-            @PathVariable String tenantCode,
-            @RequestParam(required = false) String search) {
+            @PathVariable("tenantCode") String tenantCode,
+            @RequestParam(name = "search", required = false) String search) {
         if (search != null && !search.isEmpty()) {
             return new ResponseEntity<>(customersService.searchCustomers(search, tenantCode), HttpStatus.OK);
         }
@@ -36,8 +37,8 @@ public class CustomersController {
     @ResponseBody
     @CrossOrigin
     public ResponseEntity<List<CustomerDetailsModel>> getCustomer(
-            @PathVariable String tenantCode,
-            @PathVariable String contactNo) {
+            @PathVariable("tenantCode") String tenantCode,
+            @PathVariable("contactNo") String contactNo) {
         return new ResponseEntity<>(customersService.getCustomer(contactNo, tenantCode), HttpStatus.OK);
     }
 
@@ -45,7 +46,7 @@ public class CustomersController {
     @ResponseBody
     @CrossOrigin
     public ResponseEntity<CustomerDetailsModel> createCustomer(
-            @PathVariable String tenantCode,
+            @PathVariable("tenantCode") String tenantCode,
             @RequestBody CustomerDetailsModel customerDetailsModel) {
         try {
             customerDetailsModel = customersService.createCustomer(customerDetailsModel, tenantCode);
@@ -59,7 +60,7 @@ public class CustomersController {
     @ResponseBody
     @CrossOrigin
     public ResponseEntity<CustomerDetailsModel> updateCustomer(
-            @PathVariable String tenantCode,
+            @PathVariable("tenantCode") String tenantCode,
             @RequestBody CustomerDetailsModel customerDetailsModel) {
         try {
             customerDetailsModel = customersService.updateCustomer(customerDetailsModel, tenantCode);
@@ -73,8 +74,8 @@ public class CustomersController {
     @ResponseBody
     @CrossOrigin
     public ResponseEntity<List<CustomerMeasurementModel>> getMeasurements(
-            @PathVariable String tenantCode,
-            @RequestParam(required = false) String search) {
+            @PathVariable("tenantCode") String tenantCode,
+            @RequestParam(name = "search", required = false) String search) {
         try {
             if (search != null && !search.isEmpty()) {
                 return new ResponseEntity<>(customersService.searchMeasurements(search, tenantCode), HttpStatus.OK);
@@ -89,8 +90,8 @@ public class CustomersController {
     @ResponseBody
     @CrossOrigin
     public ResponseEntity<List<CustomerMeasurementModel>> getCustomerMeasurements(
-            @PathVariable String tenantCode,
-            @NonNull @PathVariable String contactNo) {
+            @PathVariable("tenantCode") String tenantCode,
+            @NonNull @PathVariable("contactNo") String contactNo) {
         try {
             return new ResponseEntity<>(customersService.getCustomerMeasurements(contactNo, tenantCode), HttpStatus.OK);
         } catch (Exception e) {
@@ -102,7 +103,7 @@ public class CustomersController {
     @ResponseBody
     @CrossOrigin
     public ResponseEntity<CustomerMeasurementModel> CreateCustomerMeasurement(
-            @PathVariable String tenantCode,
+            @PathVariable("tenantCode") String tenantCode,
             @RequestBody CustomerMeasurementModel customerMeasurementModel) {
         try {
             return new ResponseEntity<>(customersService.createCustomerMeasurement(customerMeasurementModel, tenantCode), HttpStatus.OK);
@@ -111,11 +112,39 @@ public class CustomersController {
         }
     }
 
+    @DeleteMapping("/{customerId}")
+    @ResponseBody
+    @CrossOrigin
+    public ResponseEntity<?> deleteCustomer(
+            @PathVariable("tenantCode") String tenantCode,
+            @PathVariable("customerId") Long customerId) {
+        try {
+            customersService.deleteCustomer(customerId, tenantCode);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/measurements/{measurementId}")
+    @ResponseBody
+    @CrossOrigin
+    public ResponseEntity<?> deleteMeasurement(
+            @PathVariable("tenantCode") String tenantCode,
+            @PathVariable("measurementId") Long measurementId) {
+        try {
+            customersService.deleteMeasurement(measurementId, tenantCode);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @PutMapping("/measurements")
     @ResponseBody
     @CrossOrigin
     public ResponseEntity<CustomerMeasurementModel> updateCustomerMeasurement(
-            @PathVariable String tenantCode,
+            @PathVariable("tenantCode") String tenantCode,
             @RequestBody CustomerMeasurementModel customerMeasurementModel) {
         try {
             return new ResponseEntity<>(customersService.updateCustomerMeasurement(customerMeasurementModel, tenantCode), HttpStatus.OK);

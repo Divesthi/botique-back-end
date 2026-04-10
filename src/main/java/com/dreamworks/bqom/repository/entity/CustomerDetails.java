@@ -41,12 +41,16 @@ public class CustomerDetails implements Serializable {
     @Column(name = "creation_date")
     private OffsetDateTime creationDate;
 
+    @Column(name = "updated_date")
+    private OffsetDateTime updatedDate;
+
     public CustomerDetailsModel toModel() {
         return CustomerDetailsModel.builder()
         .name(name)
         .address(address)
         .tenantCode(tenantCode)
         .creationDate(creationDate)
+        .updatedDate(updatedDate)
         .alternateContactNo(alternateContactNo)
         .id(id)
         .mobileNo(mobileNo).build();

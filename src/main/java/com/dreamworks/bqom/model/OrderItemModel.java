@@ -1,13 +1,17 @@
 package com.dreamworks.bqom.model;
 
 import com.dreamworks.bqom.repository.enums.OrderStatus;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderItemModel {
     private Long id;
     private Long orderId;

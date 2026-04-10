@@ -41,6 +41,9 @@ public class CustomerMeasurementDetails implements Serializable {
     @Column(name = "creation_date")
     private OffsetDateTime creationDate;
 
+    @Column(name = "updated_date")
+    private OffsetDateTime updatedDate;
+
     @Column(name = "tenant_code", insertable = false, updatable = false)
     private String tenantCode;
 
@@ -73,6 +76,7 @@ public class CustomerMeasurementDetails implements Serializable {
                 .mobileNo(customerDetails.getMobileNo())
                 .tenantCode(customerDetails.getTenantCode())
                 .creationDate(creationDate)
+                .updatedDate(updatedDate)
                 .id(id)
                 .build();
     }

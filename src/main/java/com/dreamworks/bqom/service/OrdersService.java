@@ -70,6 +70,7 @@ public class OrdersService {
             OrderDetails orderDetails = OrderDetails.toEntity(orderModel, customerDetails);
             orderDetails.setStatus(OrderStatus.fresh);
             orderDetails.setReceivedDate(OffsetDateTime.now());
+            orderDetails.setUpdatedDate(OffsetDateTime.now());
             orderDetails = ordersRepository.save(orderDetails);
             List<OrderItemModel> orderItemModels = orderModel.getOrderItems();
             List<OrderItemDetails> orderItemDetails = new ArrayList<>(1);
@@ -100,6 +101,22 @@ public class OrdersService {
     }
 
     @Transactional
+    public void deleteOrder(Long orderId, String tenantCode) {
+        OrderDetails orderDetails = ordersRepository.getOrderById(orderId, tenantCode);
+        if (orderDetails == null) {
+            throw new RuntimeException("Order not found");
+        }
+        List<OrderItemDetails> items = ordersRepository.getOrderItemsByOrderId(orderId, tenantCode);
+        for (OrderItemDetails item : items) {
+            List<OrderItemCost> costs = ordersRepository.getOrderItemCostByItemId(item.getId(), tenantCode);
+            ordersRepository.deleteAll(costs);
+        }
+        ordersRepository.deleteAll(items);
+        ordersRepository.delete(orderDetails);
+        log.info("Order {} deleted successfully", orderId);
+    }
+
+    @Transactional
     public OrderModel updateOrder(OrderModel orderModel, String tenantCode) {
         try {
             OrderDetails orderDetails = ordersRepository.getOrderById(orderModel.getId(), tenantCode);
@@ -114,7 +131,21 @@ public class OrdersService {
                 orderDetails.setPackagingDate(orderModel.getPackagingDate());
                 orderDetails.setRemarks(orderModel.getRemarks());
                 orderDetails.setEstimateAmount(orderModel.getEstimateAmount());
+                orderDetails.setUpdatedDate(OffsetDateTime.now());
+                if (OrderStatus.delivered.equals(orderModel.getStatus()) && orderDetails.getDeliveredDate() == null) {
+                    orderDetails.setDeliveredDate(OffsetDateTime.now());
+                }
                 orderDetails = ordersRepository.save(orderDetails);
+
+                if (OrderStatus.delivered.equals(orderModel.getStatus()) &&
+                        (orderModel.getOrderItems() == null || orderModel.getOrderItems().isEmpty())) {
+                    List<OrderItemDetails> existingItems = ordersRepository.getOrderItemsByOrderId(orderModel.getId(), tenantCode);
+                    for (OrderItemDetails item : existingItems) {
+                        item.setStatus(OrderStatus.delivered);
+                    }
+                    ordersRepository.saveAll(existingItems);
+                    log.info("Cascaded delivered status to all items for order - {}", orderDetails.getId());
+                }
 
                 if (orderModel.getOrderItems() != null && !orderModel.getOrderItems().isEmpty()) {
                     CustomerDetails customerDetails = orderDetails.getCustomerDetails();

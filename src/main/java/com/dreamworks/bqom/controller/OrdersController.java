@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/v1/bqom/tenants/{tenantCode}/orders", produces = "application/json")
@@ -24,10 +25,10 @@ public class OrdersController {
     @ResponseBody
     @CrossOrigin
     public ResponseEntity<List<OrderModel>> getOrders(
-            @PathVariable String tenantCode,
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
+            @PathVariable("tenantCode") String tenantCode,
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(name = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate) {
 
         boolean hasDateFilter = fromDate != null && toDate != null;
         boolean hasSearch = search != null && !search.isEmpty();
@@ -52,17 +53,31 @@ public class OrdersController {
     @ResponseBody
     @CrossOrigin
     public ResponseEntity createOrder(
-            @PathVariable String tenantCode,
+            @PathVariable("tenantCode") String tenantCode,
             @RequestBody OrderModel orderModel) {
         ordersService.createOrder(orderModel, tenantCode);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{orderId}")
+    @ResponseBody
+    @CrossOrigin
+    public ResponseEntity<?> deleteOrder(
+            @PathVariable("tenantCode") String tenantCode,
+            @PathVariable("orderId") Long orderId) {
+        try {
+            ordersService.deleteOrder(orderId, tenantCode);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @PutMapping("")
     @ResponseBody
     @CrossOrigin
     public ResponseEntity<OrderModel> updateOrder(
-            @PathVariable String tenantCode,
+            @PathVariable("tenantCode") String tenantCode,
             @RequestBody OrderModel orderModel) {
         try {
             OrderModel updatedOrder = ordersService.updateOrder(orderModel, tenantCode);

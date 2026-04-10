@@ -1,14 +1,18 @@
 package com.dreamworks.bqom.model.order;
 
 import com.dreamworks.bqom.repository.enums.OrderStatus;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrderModel {
     private Long id;
     private OffsetDateTime receivedDate;
@@ -24,5 +28,7 @@ public class OrderModel {
     private String mobileNo;
     private String tenantCode;
     private String estimateAmount;
+    private OffsetDateTime updatedDate;
+    private OffsetDateTime deliveredDate;
     private List<OrderItemModel> orderItems;
 }

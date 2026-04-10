@@ -73,7 +73,7 @@ public class BackupController {
      */
     @PostMapping("/restore/{fileName}")
     @CrossOrigin
-    public ResponseEntity<Map<String, Object>> restoreBackup(@PathVariable String fileName) {
+    public ResponseEntity<Map<String, Object>> restoreBackup(@PathVariable("fileName") String fileName) {
         log.info("Database restore triggered via API for file: {}", fileName);
         Map<String, Object> response = new HashMap<>();
 

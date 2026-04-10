@@ -1,5 +1,6 @@
 package com.dreamworks.bqom.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,8 @@ import java.time.OffsetDateTime;
 
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CustomerDetailsModel {
     private Long id;
     private String name;

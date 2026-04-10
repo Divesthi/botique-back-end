@@ -67,7 +67,7 @@ public class AuthController {
      */
     @GetMapping("/users")
     @RequireRole(UserRole.TENANT_ADMIN)
-    public ResponseEntity<List<TenantUserModel>> getUsers(@RequestParam(required = false) String tenantCode) {
+    public ResponseEntity<List<TenantUserModel>> getUsers(@RequestParam(name = "tenantCode", required = false) String tenantCode) {
         AuthenticatedUser currentUser = getAuthenticatedUser();
         List<TenantUserModel> users = authService.getUsers(tenantCode, currentUser);
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -79,7 +79,7 @@ public class AuthController {
     @PutMapping("/users/{userId}/role")
     @RequireRole(UserRole.TENANT_ADMIN)
     public ResponseEntity<TenantUserModel> updateUserRole(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody Map<String, String> body) {
         AuthenticatedUser currentUser = getAuthenticatedUser();
         UserRole newRole = UserRole.valueOf(body.get("role"));
@@ -93,7 +93,7 @@ public class AuthController {
     @PutMapping("/users/{userId}/status")
     @RequireRole(UserRole.TENANT_ADMIN)
     public ResponseEntity<TenantUserModel> updateUserStatus(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody Map<String, Boolean> body) {
         AuthenticatedUser currentUser = getAuthenticatedUser();
         boolean active = Boolean.TRUE.equals(body.get("active"));

@@ -55,6 +55,12 @@ public class OrderDetails extends BaseEntity implements Serializable {
     @Column(name = "estimate_amount", columnDefinition = "JSON")
     private String estimateAmount;
 
+    @Column(name = "updated_date")
+    private OffsetDateTime updatedDate;
+
+    @Column(name = "delivered_date")
+    private OffsetDateTime deliveredDate;
+
     @Column(name = "tenant_code", insertable = false, updatable = false)
     private String tenantCode;
 
@@ -105,6 +111,8 @@ public class OrderDetails extends BaseEntity implements Serializable {
                 .mobileNo(customerDetails.getMobileNo())
                 .tenantCode(customerDetails.getTenantCode())
                 .estimateAmount(estimateAmount)
+                .updatedDate(updatedDate)
+                .deliveredDate(deliveredDate)
                 .orderItems(orderItems != null ? orderItems.stream().map(OrderItemDetails::toModel).toList() : List.of())
                 .build();
     }

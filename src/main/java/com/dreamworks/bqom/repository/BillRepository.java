@@ -1,6 +1,7 @@
 package com.dreamworks.bqom.repository;
 
 import com.dreamworks.bqom.repository.entity.BillDetails;
+import com.dreamworks.bqom.repository.entity.BillOrdersAssociation;
 import com.dreamworks.bqom.repository.entity.OrderDetails;
 import com.dreamworks.bqom.repository.entity.base.BaseEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,6 +28,9 @@ public interface BillRepository extends JpaRepository<BaseEntity, Long> {
     @Query("select boa.orderDetails from BillOrdersAssociation boa where boa.billDetails.id = :billId and boa.customerDetails.tenantCode = :tenantCode")
     List<OrderDetails> getOrdersForBillId(@Param("billId") String billId,
                                           @Param("tenantCode") String tenantCode);
+
+    @Query("select boa from BillOrdersAssociation boa where boa.billDetails.id = :billId")
+    List<BillOrdersAssociation> getBillOrdersAssociationsByBillId(@Param("billId") Long billId);
 
     @Query("select bd from BillDetails bd where " +
            "(lower(bd.customerDetails.name) like lower(concat('%', :searchTerm, '%')) or " +

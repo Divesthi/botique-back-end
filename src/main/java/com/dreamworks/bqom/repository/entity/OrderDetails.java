@@ -73,9 +73,8 @@ public class OrderDetails extends BaseEntity implements Serializable {
 
     @OneToMany(
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL
+            mappedBy = "orderDetails"
     )
-    @JoinColumn(name = "order_id", referencedColumnName = "id")
     private List<OrderItemDetails> orderItems;
 
     public static OrderDetails toEntity(OrderModel model, CustomerDetails customerDetails) {

@@ -80,7 +80,7 @@ public class OrdersService {
                         customerMeasurementRepository.findById(itemModel.getMeasurementId());
                 OrderItemDetails itemDetails = OrderItemDetails.toEntity(itemModel, customerDetails, customerMeasurementDetailsOpt.get()
                         , orderDetails);
-                itemDetails.setStatus(OrderStatus.in_progress);
+                itemDetails.setStatus(OrderStatus.fresh);
                 orderItemDetails.add(itemDetails);
                 itemCostMap.put(itemModel.getMeasurementId(), itemModel.getItemsCost());
             }

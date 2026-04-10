@@ -32,6 +32,7 @@ public class OrderWithItemsTest {
     @Autowired
     private CustomersService customersService;
 
+    private static final String TEST_TENANT_CODE = "BOUTIQUE_A";
     private String testMobileNo;
     private Long testMeasurementId;
 
@@ -44,7 +45,7 @@ public class OrderWithItemsTest {
                 .name("Test Customer")
                 .address("Test Address")
                 .build();
-        customersService.createCustomer(customer);
+        customersService.createCustomer(customer, TEST_TENANT_CODE);
 
         // Create a test measurement
         Map<String, Object> measurementData = new HashMap<>();
@@ -60,7 +61,7 @@ public class OrderWithItemsTest {
                 .measurement(measurementData)
                 .build();
 
-        CustomerMeasurementModel createdMeasurement = customersService.createCustomerMeasurement(measurement);
+        CustomerMeasurementModel createdMeasurement = customersService.createCustomerMeasurement(measurement, TEST_TENANT_CODE);
         testMeasurementId = createdMeasurement.getId();
     }
 
@@ -111,10 +112,10 @@ public class OrderWithItemsTest {
                 .build();
 
         // Create the order (returns void)
-        ordersService.createOrder(order);
+        ordersService.createOrder(order, TEST_TENANT_CODE);
 
         // Get all orders to verify
-        List<OrderModel> allOrders = ordersService.getOrders();
+        List<OrderModel> allOrders = ordersService.getOrders(TEST_TENANT_CODE);
         OrderModel createdOrder = allOrders.stream()
                 .filter(o -> testMobileNo.equals(o.getMobileNo()))
                 .findFirst()
@@ -153,7 +154,7 @@ public class OrderWithItemsTest {
         testCreateOrderWithItemsAndCosts();
 
         // Get all orders
-        List<OrderModel> orders = ordersService.getOrders();
+        List<OrderModel> orders = ordersService.getOrders(TEST_TENANT_CODE);
 
         // Find the test order
         OrderModel fetchedOrder = orders.stream()
@@ -185,7 +186,7 @@ public class OrderWithItemsTest {
         testCreateOrderWithItemsAndCosts();
 
         // Get the created order
-        List<OrderModel> orders = ordersService.getOrders();
+        List<OrderModel> orders = ordersService.getOrders(TEST_TENANT_CODE);
         OrderModel existingOrder = orders.stream()
                 .filter(o -> testMobileNo.equals(o.getMobileNo()))
                 .findFirst()
@@ -228,7 +229,7 @@ public class OrderWithItemsTest {
         existingOrder.setTotal(2100.0);
         existingOrder.setOrderItems(updatedItems);
 
-        OrderModel updatedOrder = ordersService.updateOrder(existingOrder);
+        OrderModel updatedOrder = ordersService.updateOrder(existingOrder, TEST_TENANT_CODE);
 
         // Assertions
         assertNotNull(updatedOrder);
@@ -308,10 +309,10 @@ public class OrderWithItemsTest {
                 .build();
 
         // Create the order
-        ordersService.createOrder(order);
+        ordersService.createOrder(order, TEST_TENANT_CODE);
 
         // Get all orders to verify
-        List<OrderModel> allOrders = ordersService.getOrders();
+        List<OrderModel> allOrders = ordersService.getOrders(TEST_TENANT_CODE);
         OrderModel createdOrder = allOrders.stream()
                 .filter(o -> testMobileNo.equals(o.getMobileNo()))
                 .findFirst()

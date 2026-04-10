@@ -39,7 +39,7 @@ public class OrderItemCost extends BaseEntity implements Serializable {
     })
     private CustomerDetails customerDetails;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     private OrderItemDetails orderItemDetails;
 

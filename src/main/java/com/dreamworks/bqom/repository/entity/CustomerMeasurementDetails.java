@@ -20,6 +20,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CustomerMeasurementDetails implements Serializable {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -49,35 +50,7 @@ public class CustomerMeasurementDetails implements Serializable {
 
     @OneToOne(
             fetch = FetchType.EAGER,
-            cascade = CascadeType.ALL)
-    @JoinColumns({
-            @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no"),
-            @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code")
-    })
-    private CustomerDetails customerDetails;
-
-    public static CustomerMeasurementDetails toEntity(CustomerMeasurementModel customerMeasurementModel,
-                                                      CustomerDetails customerDetails) {
-        return CustomerMeasurementDetails.builder()
-                .measurement(customerMeasurementModel.getMeasurement())
-                .dressType(customerMeasurementModel.getDressType())
-                .name(customerMeasurementModel.getName())
-                .remarks(customerMeasurementModel.getRemarks())
-                .customerDetails(customerDetails)
-                .build();
-    }
-
-    public CustomerMeasurementModel toModel() {
-        return CustomerMeasurementModel.builder()
-                .name(name)
-                .measurement(measurement)
-                .remarks(remarks)
-                .dressType(dressType)
-                .mobileNo(customerDetails.getMobileNo())
-                .tenantCode(customerDetails.getTenantCode())
-                .creationDate(creationDate)
-                .updatedDate(updatedDate)
-                .id(id)
-                .build();
-    }
+            cascade = CascadeType.REMOVE) // Added cascade type remove
+    
+    ...
 }

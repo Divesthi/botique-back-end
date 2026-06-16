@@ -6,6 +6,7 @@ import com.dreamworks.bqom.model.order.OrderModel;
 import com.dreamworks.bqom.repository.CustomerMeasurementRepository;
 import com.dreamworks.bqom.repository.CustomersRepository;
 import com.dreamworks.bqom.repository.OrdersRepository;
+import com.dreamworks.bqom.repository.TenantRepository;
 import com.dreamworks.bqom.repository.entity.*;
 import com.dreamworks.bqom.repository.enums.OrderStatus;
 import jakarta.transaction.Transactional;
@@ -27,6 +28,10 @@ public class OrdersService {
     private CustomersRepository customersRepository;
     @Autowired
     private CustomerMeasurementRepository customerMeasurementRepository;
+    @Autowired
+    private TenantRepository tenantRepository;
+    @Autowired
+    private WhatsAppNotificationService whatsAppNotificationService;
 
     public List<OrderModel> getOrders(String tenantCode) {
         List<OrderDetails> orders = ordersRepository.getOrders(tenantCode);
@@ -194,6 +199,35 @@ public class OrdersService {
                     }
                     ordersRepository.saveAll(costsEntity);
                     log.info("Order items and costs updated for order - {}", orderDetails.getId());
+                }
+
+                // ── WhatsApp Notification Trigger ──────────────────────────────
+                // Fire notification when order transitions to 'completed'
+                if (OrderStatus.completed.equals(orderModel.getStatus())) {
+                    try {
+                        // Fetch customer name from customer_details
+                        CustomerDetails customer = customersRepository
+                                .getCustomerDetailsByMobileNumber(orderModel.getMobileNo(), tenantCode);
+                        // Fetch boutique name from tenant
+                        Tenant tenant = tenantRepository.findByCode(tenantCode)
+                                .orElse(null);
+
+                        if (customer != null && tenant != null) {
+                            whatsAppNotificationService.sendOrderReadyNotification(
+                                    tenantCode,
+                                    tenant.getName(),           // boutique name
+                                    customer.getName(),         // customer name
+                                    orderModel.getMobileNo(),   // customer mobile
+                                    orderModel.getId()          // order id
+                            );
+                        } else {
+                            log.warn("Skipping WhatsApp notification — customer or tenant not found for order {}",
+                                    orderDetails.getId());
+                        }
+                    } catch (Exception e) {
+                        // Never block order update if WhatsApp fails
+                        log.error("WhatsApp notification failed for order {}: {}", orderDetails.getId() , e.getMessage(), e);
+                    }
                 }
 
                 log.info("Order - {} updated successfully", orderDetails.getId());

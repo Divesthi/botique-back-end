@@ -3,6 +3,7 @@ package com.dreamworks.bqom.service;
 import com.dreamworks.bqom.model.customer.CustomerDetailsModel;
 import com.dreamworks.bqom.model.customer.CustomerMeasurementModel;
 import com.dreamworks.bqom.model.customer.MeasurementRequestBody;
+import com.dreamworks.bqom.model.whatsapp.MeasurementShareRequest;
 import com.dreamworks.bqom.repository.CustomerMeasurementRepository;
 import com.dreamworks.bqom.repository.CustomersRepository;
 import com.dreamworks.bqom.repository.entity.CustomerDetails;
@@ -23,6 +24,8 @@ public class CustomersService {
     private CustomersRepository customersRepository;
     @Autowired
     private CustomerMeasurementRepository customerMeasurementRepository;
+    @Autowired
+    private WhatsAppNotificationService whatsAppNotificationService;
 
     public List<CustomerDetailsModel> getCustomers(String tenantCode) {
         List<CustomerDetails> customers = customersRepository.findAllByTenantCode(tenantCode);
@@ -247,5 +250,17 @@ public class CustomersService {
             log.error("Error while updating the measurement for the customer - {}", measurementModel.getMobileNo(), e);
             throw e;
         }
+    }
+
+    public CustomerMeasurementModel shareMeasurement(Long measurementId, String tenantCode,
+                                                     MeasurementShareRequest measurementShareRequest) {
+        Optional<CustomerMeasurementDetails> measurementOpt = customerMeasurementRepository.findById(measurementId);
+        if (measurementOpt.isEmpty() || !measurementOpt.get().getCustomerDetails().getTenantCode().equals(tenantCode)) {
+            throw new RuntimeException("Measurement not found");
+        }
+        CustomerMeasurementModel measurement = measurementOpt.get().toModel();
+        whatsAppNotificationService.sendMeasurement(tenantCode, measurement.getName(),
+                measurement.getDressType(), measurement.getMeasurement(), measurementShareRequest.getToPhoneNumber());
+        return measurement;
     }
 }

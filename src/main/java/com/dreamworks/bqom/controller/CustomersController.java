@@ -2,7 +2,7 @@ package com.dreamworks.bqom.controller;
 
 import com.dreamworks.bqom.model.customer.CustomerDetailsModel;
 import com.dreamworks.bqom.model.customer.CustomerMeasurementModel;
-import com.dreamworks.bqom.model.customer.MeasurementRequestBody;
+import com.dreamworks.bqom.model.notification.MeasurementShareRequest;
 import com.dreamworks.bqom.service.CustomersService;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -150,6 +150,20 @@ public class CustomersController {
             return new ResponseEntity<>(customersService.updateCustomerMeasurement(customerMeasurementModel, tenantCode), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/measurements/{measurementId}/share")
+    @ResponseBody
+    @CrossOrigin
+    public ResponseEntity<CustomerMeasurementModel> shareMeasurement(
+            @PathVariable("tenantCode") String tenantCode,
+            @PathVariable("measurementId") Long measurementId,
+            @RequestBody MeasurementShareRequest measurementShareRequest) {
+        try {
+            return new ResponseEntity<>(customersService.shareMeasurement(tenantCode, measurementId, measurementShareRequest), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @Data
 @Builder
@@ -22,4 +23,5 @@ public class TenantModel {
     private LocalDate startedDate;
     private LocalDate churnedDate;
     private Boolean active;
+    private Map<String, Object> preferences;
 }

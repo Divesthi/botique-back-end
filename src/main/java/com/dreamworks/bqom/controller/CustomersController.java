@@ -2,8 +2,7 @@ package com.dreamworks.bqom.controller;
 
 import com.dreamworks.bqom.model.customer.CustomerDetailsModel;
 import com.dreamworks.bqom.model.customer.CustomerMeasurementModel;
-import com.dreamworks.bqom.model.customer.MeasurementRequestBody;
-import com.dreamworks.bqom.model.whatsapp.MeasurementShareRequest;
+import com.dreamworks.bqom.model.notification.MeasurementShareRequest;
 import com.dreamworks.bqom.service.CustomersService;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,7 +161,7 @@ public class CustomersController {
             @PathVariable("measurementId") Long measurementId,
             @RequestBody MeasurementShareRequest measurementShareRequest) {
         try {
-            return new ResponseEntity<>(customersService.shareMeasurement(measurementId, tenantCode, measurementShareRequest), HttpStatus.OK);
+            return new ResponseEntity<>(customersService.shareMeasurement(tenantCode, measurementId, measurementShareRequest), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }

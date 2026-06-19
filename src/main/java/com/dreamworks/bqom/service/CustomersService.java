@@ -2,12 +2,13 @@ package com.dreamworks.bqom.service;
 
 import com.dreamworks.bqom.model.customer.CustomerDetailsModel;
 import com.dreamworks.bqom.model.customer.CustomerMeasurementModel;
-import com.dreamworks.bqom.model.customer.MeasurementRequestBody;
-import com.dreamworks.bqom.model.whatsapp.MeasurementShareRequest;
+import com.dreamworks.bqom.model.notification.MeasurementShareRequest;
+import com.dreamworks.bqom.model.notification.NotificationMessage;
 import com.dreamworks.bqom.repository.CustomerMeasurementRepository;
 import com.dreamworks.bqom.repository.CustomersRepository;
 import com.dreamworks.bqom.repository.entity.CustomerDetails;
 import com.dreamworks.bqom.repository.entity.CustomerMeasurementDetails;
+import com.dreamworks.bqom.service.notification.NotificationDispatcher;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -25,7 +27,7 @@ public class CustomersService {
     @Autowired
     private CustomerMeasurementRepository customerMeasurementRepository;
     @Autowired
-    private WhatsAppNotificationService whatsAppNotificationService;
+    private NotificationDispatcher notificationDispatcher;
 
     public List<CustomerDetailsModel> getCustomers(String tenantCode) {
         List<CustomerDetails> customers = customersRepository.findAllByTenantCode(tenantCode);
@@ -252,15 +254,32 @@ public class CustomersService {
         }
     }
 
-    public CustomerMeasurementModel shareMeasurement(Long measurementId, String tenantCode,
+    public CustomerMeasurementModel shareMeasurement(String tenantCode,
+                                                     Long measurementId,
                                                      MeasurementShareRequest measurementShareRequest) {
         Optional<CustomerMeasurementDetails> measurementOpt = customerMeasurementRepository.findById(measurementId);
         if (measurementOpt.isEmpty() || !measurementOpt.get().getCustomerDetails().getTenantCode().equals(tenantCode)) {
             throw new RuntimeException("Measurement not found");
         }
         CustomerMeasurementModel measurement = measurementOpt.get().toModel();
-        whatsAppNotificationService.sendMeasurement(tenantCode, measurement.getName(),
-                measurement.getDressType(), measurement.getMeasurement(), measurementShareRequest.getToPhoneNumber());
+        NotificationMessage notificationMessage = new NotificationMessage();
+        notificationMessage.setTenantCode(tenantCode);
+        notificationMessage.setToPhoneNumber(measurementShareRequest.getToPhoneNumber());
+        Map<String, String> parameters = new HashMap<>(0);
+        parameters.put(NotificationConstants.DRESS_TYPE, measurement.getDressType());
+        String mString = measurement.getMeasurement().entrySet()
+                .stream()
+                .map(entry -> {
+                    String key = Arrays.stream(entry.getKey().split("_"))
+                            .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1))
+                            .collect(Collectors.joining(" "));
+                    return key + ": " + entry.getValue();
+                })
+                .collect(Collectors.joining("  |  "));
+        parameters.put(NotificationConstants.MEASUREMENTS, mString);
+        parameters.put(NotificationConstants.CUSTOMER_NAME, measurement.getName());
+        notificationMessage.setParameters(parameters);
+        notificationDispatcher.dispatchMeasurement(notificationMessage);
         return measurement;
     }
 }

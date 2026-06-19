@@ -1,8 +1,7 @@
-package com.dreamworks.bqom.model.whatsapp;
+package com.dreamworks.bqom.model.notification;
 
 import lombok.Builder;
 import lombok.Data;
-import java.util.List;
 
 @Data
 @Builder

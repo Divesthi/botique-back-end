@@ -1,4 +1,4 @@
-package com.dreamworks.bqom.model.whatsapp;
+package com.dreamworks.bqom.model.notification;
 
 import lombok.Data;
 import java.time.LocalDateTime;

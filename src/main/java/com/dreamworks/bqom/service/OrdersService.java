@@ -1,5 +1,6 @@
 package com.dreamworks.bqom.service;
 
+import com.dreamworks.bqom.model.notification.NotificationMessage;
 import com.dreamworks.bqom.model.order.OrderItemCostModel;
 import com.dreamworks.bqom.model.order.OrderItemModel;
 import com.dreamworks.bqom.model.order.OrderModel;
@@ -9,6 +10,7 @@ import com.dreamworks.bqom.repository.OrdersRepository;
 import com.dreamworks.bqom.repository.TenantRepository;
 import com.dreamworks.bqom.repository.entity.*;
 import com.dreamworks.bqom.repository.enums.OrderStatus;
+import com.dreamworks.bqom.service.notification.NotificationDispatcher;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +33,7 @@ public class OrdersService {
     @Autowired
     private TenantRepository tenantRepository;
     @Autowired
-    private WhatsAppNotificationService whatsAppNotificationService;
+    private NotificationDispatcher notificationDispatcher;
 
     public List<OrderModel> getOrders(String tenantCode) {
         List<OrderDetails> orders = ordersRepository.getOrders(tenantCode);
@@ -203,6 +205,7 @@ public class OrdersService {
 
                 // ── WhatsApp Notification Trigger ──────────────────────────────
                 // Fire notification when order transitions to 'completed'
+
                 if (OrderStatus.completed.equals(orderModel.getStatus())) {
                     try {
                         // Fetch customer name from customer_details
@@ -213,13 +216,15 @@ public class OrdersService {
                                 .orElse(null);
 
                         if (customer != null && tenant != null) {
-                            whatsAppNotificationService.sendOrderReadyNotification(
-                                    tenantCode,
-                                    tenant.getName(),           // boutique name
-                                    customer.getName(),         // customer name
-                                    orderModel.getMobileNo(),   // customer mobile
-                                    orderModel.getId()          // order id
-                            );
+                            NotificationMessage notificationMessage = new NotificationMessage();
+                            notificationMessage.setTenantCode(tenantCode);
+                            Map<String, String> parameters = new HashMap<>(0);
+                            parameters.put(NotificationConstants.CUSTOMER_NAME, customer.getName());
+                            parameters.put(NotificationConstants.BOUTIQUE_NAME, tenant.getName());
+                            parameters.put(NotificationConstants.ORDER_ID, orderDetails.getId().toString());
+                            notificationMessage.setParameters(parameters);
+                            notificationMessage.setToPhoneNumber(customer.getMobileNo());
+                            notificationDispatcher.dispatchOrderStatus(notificationMessage);
                         } else {
                             log.warn("Skipping WhatsApp notification — customer or tenant not found for order {}",
                                     orderDetails.getId());

@@ -1,64 +1,48 @@
--- ── 1. Add preferences JSONB column to tenant table ─────────────────────────
-
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 1. Add `preferences` JSONB column to the existing `tenant` table.
+--    Default is an empty JSON object so existing rows get a valid value.
+--    The column is nullable-safe: all reads should treat NULL the same as '{}'.
+-- ─────────────────────────────────────────────────────────────────────────────
 ALTER TABLE tenant
     ADD COLUMN IF NOT EXISTS preferences JSONB NOT NULL DEFAULT '{}';
 
-COMMENT ON COLUMN tenant.preferences IS
-    'Per-tenant feature flags and lightweight config (NOT credentials). '
-    'Example: {"notifications": {"channel": "telegram"}, "features": {"loyalty_points": true}}';
-
--- GIN index for efficient JSONB key lookups
-CREATE INDEX IF NOT EXISTS idx_tenant_preferences_gin
-    ON tenant USING GIN (preferences);
-
-
--- ── 2. Create tenant_telegram_config table ───────────────────────────────────
-
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 2. Create `tenant_telegram_config` table.
+--
+--    Design notes:
+--    • `bot_token` and `chat_id` are stored AES-256-GCM encrypted at the
+--      service layer — the DB never sees plaintext credentials.
+--    • `tenant_code` is the FK to `tenant(code)` — consistent with every
+--      other table in the schema.
+--    • `active` flag lets admins disable a config without deleting it.
+--    • `created_at` / `updated_at` for auditing.
+-- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS tenant_telegram_config (
-    id                  BIGSERIAL       PRIMARY KEY,
-    tenant_id           BIGINT          NOT NULL UNIQUE,
-    bot_token_encrypted TEXT            NOT NULL,
-    chat_id             VARCHAR(100)    NOT NULL,
-    created_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id          BIGSERIAL    PRIMARY KEY,
+    tenant_code VARCHAR(25)  NOT NULL,
+    bot_token   TEXT         NOT NULL,          -- AES-256-GCM encrypted
+    chat_id     VARCHAR(255) NOT NULL,          -- AES-256-GCM encrypted
+    active      BOOLEAN      NOT NULL DEFAULT TRUE,
+    created_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_telegram_config_tenant
-        FOREIGN KEY (tenant_id)
-        REFERENCES tenant (id)
-        ON DELETE CASCADE
+    CONSTRAINT fk_telegram_cfg_tenant
+        FOREIGN KEY (tenant_code) REFERENCES tenant(code)
+        ON DELETE CASCADE,
+
+    CONSTRAINT uq_telegram_cfg_tenant
+        UNIQUE (tenant_code)               -- one active config per tenant
 );
 
-COMMENT ON TABLE tenant_telegram_config IS
-    'Stores AES-256 encrypted Telegram bot credentials per tenant. '
-    'One row per tenant (enforced by UNIQUE on tenant_id).';
+-- Index for the most common lookup pattern (by tenant_code)
+CREATE INDEX IF NOT EXISTS idx_telegram_cfg_tenant_code
+    ON tenant_telegram_config(tenant_code);
 
-COMMENT ON COLUMN tenant_telegram_config.bot_token_encrypted IS
-    'AES-256-GCM encrypted Telegram bot token. Decrypted at service layer only.';
-
-COMMENT ON COLUMN tenant_telegram_config.chat_id IS
-    'Telegram chat/channel ID to send messages to. e.g. -100123456789';
-
-
--- ── 3. Index on tenant_id for fast config lookup ─────────────────────────────
-
-CREATE INDEX IF NOT EXISTS idx_telegram_config_tenant_id
-    ON tenant_telegram_config (tenant_id);
-
-
--- ── 4. Auto-update updated_at on row change ──────────────────────────────────
-
--- Create the trigger function (shared, reusable across tables)
-CREATE OR REPLACE FUNCTION fn_set_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Attach trigger to tenant_telegram_config
-DROP TRIGGER IF EXISTS trg_telegram_config_updated_at ON tenant_telegram_config;
-CREATE TRIGGER trg_telegram_config_updated_at
-    BEFORE UPDATE ON tenant_telegram_config
-    FOR EACH ROW
-    EXECUTE FUNCTION fn_set_updated_at();
+-- ─────────────────────────────────────────────────────────────────────────────
+-- 3. Seed default notification preference on existing tenants so that the
+--    NotificationDispatcher always finds a valid channel key.
+--    "whatsapp" preserves backward-compatibility with existing behaviour.
+-- ─────────────────────────────────────────────────────────────────────────────
+UPDATE tenant
+SET preferences = preferences || '{"notifications": {"channel": "telegram"}}'::jsonb
+WHERE preferences -> 'notifications' IS NULL;

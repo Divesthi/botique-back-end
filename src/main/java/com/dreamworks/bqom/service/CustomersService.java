@@ -275,7 +275,7 @@ public class CustomersService {
                             .collect(Collectors.joining(" "));
                     return key + ": " + entry.getValue();
                 })
-                .collect(Collectors.joining("  |  "));
+                .collect(Collectors.joining("  | "));
         parameters.put(NotificationConstants.MEASUREMENTS, mString);
         parameters.put(NotificationConstants.CUSTOMER_NAME, measurement.getName());
         notificationMessage.setParameters(parameters);

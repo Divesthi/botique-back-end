@@ -5,6 +5,7 @@ import com.dreamworks.bqom.model.notification.NotificationMessage;
 import com.dreamworks.bqom.repository.entity.TenantTelegramConfig;
 import com.dreamworks.bqom.repository.TenantTelegramConfigRepository;
 import com.dreamworks.bqom.service.EncryptionService;
+import com.dreamworks.bqom.service.NotificationConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -117,8 +118,8 @@ public class TelegramNotificationStrategy implements NotificationStrategy {
         // ── 3. Build and send request ──────────────────────────────────────────
         try {
             String url         = buildSendMessageUrl(botToken);
-            //String safeMessage = truncateIfNeeded(message.getBody(), tenantCode);
-            String safeMessage = "";
+
+            String safeMessage = constructMeasurementMessage(message.getParameters());
 
             HttpEntity<Map<String, Object>> request = buildRequest(chatId, safeMessage);
 
@@ -154,6 +155,17 @@ public class TelegramNotificationStrategy implements NotificationStrategy {
             throw new NotificationException(tenantCode,
                     "Network failure sending Telegram notification for tenant: " + tenantCode, e);
         }
+    }
+
+    private String constructMeasurementMessage(Map<String, String> parameters) {
+        String template = "Hi,\n\n Here are the %s measurements details for the customer %s. \n\n %s \n\n Thank you! 🙏";
+        String measurement =  parameters.getOrDefault(NotificationConstants.MEASUREMENTS, "")
+                .replace("|", "\n");
+        return String.format(
+                template,
+                parameters.getOrDefault(NotificationConstants.DRESS_TYPE, ""),
+                parameters.getOrDefault(NotificationConstants.CUSTOMER_NAME, ""),
+                measurement);
     }
 
     @Override

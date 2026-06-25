@@ -203,6 +203,54 @@ public class TenantController {
         }
     }
 
+    /**
+     * Get the Telegram config for a tenant
+     *
+     * <p>Example request:
+     * <pre>
+     * GET /v1/bqom/tenants/BOUTIQUE_A/telegram-config
+     *
+     * </pre>
+     *
+     * @param code    tenant code (path variable)
+     * @return HTTP 200
+     */
+    @GetMapping("/{code}/telegram-config")
+    @RequireRole(UserRole.TENANT_ADMIN)
+    public ResponseEntity<?> getTelegramConfig(
+            @PathVariable("code") String code) {
+
+        log.info("[TelegramConfig] Get request for tenant={}", code);
+
+        try {
+            TenantTelegramConfig config = telegramConfigService.getTelegramConfig(code);
+
+            // Return only safe metadata — accessToken is never echoed
+            Map<String, Object> response = Map.of(
+                    "id",                   config.getId(),
+                    "tenantCode",           config.getTenantCode(),
+                    "botToken",             config.getBotToken(),
+                    "chatId",               config.getChatId(),
+                    "active",               config.isActive(),
+                    "createdAt",            config.getCreatedAt().toString(),
+                    "updatedAt",            config.getUpdatedAt().toString()
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+
+        } catch (RuntimeException e) {
+            log.error("[TelegramConfig] Failed for tenant = {}: {}", code, e.getMessage());
+
+            HttpStatus status = e.getMessage() != null
+                    && e.getMessage().contains("not found")
+                    ? HttpStatus.NOT_FOUND
+                    : HttpStatus.INTERNAL_SERVER_ERROR;
+
+            return ResponseEntity.status(status)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
     // ── NEW: WhatsApp config ───────────────────────────────────────────────────
 
     /**

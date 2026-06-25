@@ -12,6 +12,7 @@ import com.dreamworks.bqom.repository.TenantRepository;
 import com.dreamworks.bqom.repository.entity.Tenant;
 import com.dreamworks.bqom.repository.entity.TenantInstagramConfig;
 import com.dreamworks.bqom.service.EncryptionService;
+import com.dreamworks.bqom.service.NotificationConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -65,10 +66,6 @@ public class InstagramPostService {
     // Meta allows 2–10 items in a carousel; we also accept 1 (single-image feed)
     private static final int MAX_IMAGES = 10;
     private static final int MAX_CAPTION_LENGTH = 2200;
-
-    // Preference key path: tenant.preferences.instagram.autoCaption
-    private static final String PREF_INSTAGRAM     = "instagram";
-    private static final String PREF_AUTO_CAPTION  = "autoCaption";
 
     private final TenantInstagramConfigRepository instagramConfigRepository;
     private final TenantRepository                tenantRepository;
@@ -286,14 +283,14 @@ public class InstagramPostService {
             }
 
             Map<String, Object> preferences = tenant.getPreferences();
-            Object instagramPrefs = preferences.get(PREF_INSTAGRAM);
+            Object instagramPrefs = preferences.get(NotificationConstants.PREF_INSTAGRAM);
 
             if (!(instagramPrefs instanceof Map)) {
                 return false;
             }
 
             Object autoCaptionValue = ((Map<String, Object>) instagramPrefs)
-                    .get(PREF_AUTO_CAPTION);
+                    .get(NotificationConstants.PREF_AUTO_CAPTION);
 
             if (autoCaptionValue instanceof Boolean) {
                 return (Boolean) autoCaptionValue;

@@ -1,9 +1,12 @@
 package com.dreamworks.bqom.service.instagram;
 
 import com.dreamworks.bqom.config.InstagramOAuthProperties;
+import com.dreamworks.bqom.model.notification.TenantPreferencesRequest;
 import com.dreamworks.bqom.repository.TenantInstagramConfigRepository;
 import com.dreamworks.bqom.repository.entity.TenantInstagramConfig;
 import com.dreamworks.bqom.service.EncryptionService;
+import com.dreamworks.bqom.service.NotificationConstants;
+import com.dreamworks.bqom.service.TenantService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Core service for the Instagram OAuth 2.0 flow via Facebook Login.
@@ -109,6 +114,7 @@ public class InstagramOAuthService {
     private final InstagramOAuthProperties properties;
     private final StateTokenService stateTokenService;
     private final EncryptionService encryptionService;
+    private final TenantService tenantService;
     private final TenantInstagramConfigRepository instagramConfigRepository;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -176,7 +182,8 @@ public class InstagramOAuthService {
 
         // Step 5 — encrypt and persist
         persistConfig(tenantCode, longLivedToken, accountInfo);
-
+        // Step 6 - persist preference
+        persistPreference(tenantCode, true);
         log.info("[Instagram] OAuth onboarding complete for tenant={}, ig_username={}",
                 tenantCode, accountInfo.igUsername());
 
@@ -418,6 +425,23 @@ public class InstagramOAuthService {
                 });
 
         instagramConfigRepository.save(config);
+    }
+
+    /*
+     * Step 6 - Persist Preference
+     */
+    private void persistPreference(String tenantCode, boolean enable) {
+        TenantPreferencesRequest preferencesRequest = new TenantPreferencesRequest();
+        Map<String, Object> instaVal = new HashMap<>(0);
+        instaVal.put(NotificationConstants.PREF_AUTO_CAPTION, enable);
+        Map<String, Object> extras = new HashMap<>(0);
+        extras.put(NotificationConstants.PREF_INSTAGRAM, instaVal);
+        preferencesRequest.setExtras(extras);
+        tenantService.updatePreferences(tenantCode, preferencesRequest);
+    }
+
+    public void disableInstagramAutoCaption(String tenantCode) {
+        persistPreference(tenantCode, false);
     }
 
     // ── Private — parsing helpers ──────────────────────────────────────────────

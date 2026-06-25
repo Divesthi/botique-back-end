@@ -221,6 +221,7 @@ public class InstagramController {
 
         try {
             instagramConfigService.disconnect(tenantCode);
+            instagramOAuthService.disableInstagramAutoCaption(tenantCode);
             return ResponseEntity.noContent().build();
 
         } catch (InstagramConfigService.InstagramConfigNotFoundException e) {

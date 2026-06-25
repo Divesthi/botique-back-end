@@ -111,4 +111,12 @@ public class TelegramConfigService {
         telegramConfigRepository.save(config);
         log.info("[TelegramConfig] Config deactivated for tenant={}", tenantCode);
     }
+
+    public TenantTelegramConfig getTelegramConfig(String tenantCode) {
+        TenantTelegramConfig config = telegramConfigRepository
+                .findByTenantCode(tenantCode)
+                .orElseThrow(() -> new RuntimeException(
+                        "No Telegram config found for tenant: " + tenantCode));
+        return config;
+    }
 }

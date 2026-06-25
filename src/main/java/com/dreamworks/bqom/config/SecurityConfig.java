@@ -80,6 +80,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/actuator/**").permitAll();
                     auth.requestMatchers("/v1/bqom/health").permitAll();
                     auth.requestMatchers("/v1/bqom/auth/**").permitAll();
+                    auth.requestMatchers("/v1/bqom/instagram/callback").permitAll();
 
                     // Local profile — all requests open without authentication
                     if (environment.acceptsProfiles(Profiles.of("local"))) {

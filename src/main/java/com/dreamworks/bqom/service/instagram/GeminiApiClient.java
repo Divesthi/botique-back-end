@@ -209,8 +209,8 @@ public class GeminiApiClient {
         );
 
         return Map.of(
-                "contents",         List.of(content),
-                "generationConfig", generationConfig
+                "contents",         List.of(content)
+               // "generationConfig", generationConfig
         );
     }
 

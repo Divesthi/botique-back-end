@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -98,7 +99,7 @@ public class MetaGraphApiClient {
             builder.queryParam("caption", caption);
         }
 
-        return callMetaPostAndExtractId(builder.toUriString(), tenantCode, "single-image container");
+        return callMetaPostAndExtractId(builder.build().encode().toUri(), tenantCode, "single-image container");
     }
 
     /**
@@ -123,13 +124,15 @@ public class MetaGraphApiClient {
                 .buildAndExpand(igUserId)
                 .toUriString();
 
-        String fullUrl = UriComponentsBuilder.fromUriString(url)
+        URI fullUri = UriComponentsBuilder.fromUriString(url)
                 .queryParam("image_url",          imageUrl)
                 .queryParam("is_carousel_item",   "true")
                 .queryParam("access_token",        accessToken)
-                .toUriString();
+                .build()
+                .encode()
+                .toUri();
 
-        return callMetaPostAndExtractId(fullUrl, tenantCode, "carousel child container");
+        return callMetaPostAndExtractId(fullUri, tenantCode, "carousel child container");
     }
 
     /**
@@ -168,7 +171,7 @@ public class MetaGraphApiClient {
             builder.queryParam("caption", caption);
         }
 
-        return callMetaPostAndExtractId(builder.toUriString(), tenantCode, "carousel container");
+        return callMetaPostAndExtractId(builder.build().encode().toUri(), tenantCode, "carousel container");
     }
 
     /**
@@ -193,12 +196,14 @@ public class MetaGraphApiClient {
                 .buildAndExpand(igUserId)
                 .toUriString();
 
-        String fullUrl = UriComponentsBuilder.fromUriString(url)
+        URI fullUri = UriComponentsBuilder.fromUriString(url)
                 .queryParam("creation_id", creationId)
                 .queryParam("access_token", accessToken)
-                .toUriString();
+                .build()
+                .encode()
+                .toUri();
 
-        return callMetaPostAndExtractId(fullUrl, tenantCode, "media publish");
+        return callMetaPostAndExtractId(fullUri, tenantCode, "media publish");
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────
@@ -208,14 +213,14 @@ public class MetaGraphApiClient {
      * from the JSON response. All Meta content publishing endpoints return
      * {@code { "id": "..." }} on success.
      */
-    private String callMetaPostAndExtractId(String url, String tenantCode, String step) {
+    private String callMetaPostAndExtractId(URI uri, String tenantCode, String step) {
         try {
             // Meta's content publishing endpoints accept POST with URL-encoded params;
             // no request body is needed when all params are in the query string.
             HttpHeaders headers = new HttpHeaders();
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(uri, entity, String.class);
 
             return parseIdFromResponse(response, tenantCode, step);
 

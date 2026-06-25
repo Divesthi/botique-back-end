@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * requires changing this class.
  *
  * <h2>Async behaviour</h2>
- * <p>{@link #dispatch(NotificationMessage)} is annotated {@code @Async}.
+ * <p>{@link #dispatchMeasurement(NotificationMessage)} is annotated {@code @Async}.
  * It runs on Spring's default {@code SimpleAsyncTaskExecutor} (fire-and-forget).
  * The calling thread returns immediately; notification delivery is non-blocking.
  *
@@ -121,7 +121,7 @@ public class NotificationDispatcher {
      *   <li>Load tenant preferences from DB.</li>
      *   <li>Extract and resolve the configured channel.</li>
      *   <li>Look up the strategy from the registry.</li>
-     *   <li>Delegate to {@link NotificationStrategy#send(NotificationMessage)}.</li>
+     *   <li>Delegate to {@link NotificationStrategy#sendMeasurement(NotificationMessage)}.</li>
      * </ol>
      *
      * <p>Any exception at any step is caught, logged with full context, and

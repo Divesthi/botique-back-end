@@ -49,7 +49,7 @@ public class EncryptionService {
      */
     @PostConstruct
     void init() {
-        byte[] keyBytes = Base64.getDecoder().decode(base64EncodedKey);
+        byte[] keyBytes = Base64.getUrlDecoder().decode(base64EncodedKey);
         if (keyBytes.length != 32) {
             throw new IllegalStateException(
                     "BQOM_ENCRYPTION_KEY must be a Base64-encoded 32-byte (256-bit) key. " +
@@ -79,7 +79,7 @@ public class EncryptionService {
 
             // Prepend IV to ciphertext so we can recover it during decryption
             byte[] ivAndCiphertext = concat(iv, ciphertext);
-            return Base64.getEncoder().encodeToString(ivAndCiphertext);
+            return Base64.getUrlEncoder().encodeToString(ivAndCiphertext);
 
         } catch (Exception e) {
             // Do NOT log the plaintext — it's a credential
@@ -100,7 +100,7 @@ public class EncryptionService {
             throw new IllegalArgumentException("Cannot decrypt null or blank value");
         }
         try {
-            byte[] ivAndCiphertext = Base64.getDecoder().decode(encryptedBase64);
+            byte[] ivAndCiphertext = Base64.getUrlDecoder().decode(encryptedBase64);
 
             byte[] iv         = slice(ivAndCiphertext, 0, GCM_IV_LENGTH);
             byte[] ciphertext = slice(ivAndCiphertext, GCM_IV_LENGTH, ivAndCiphertext.length);

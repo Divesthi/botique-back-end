@@ -192,19 +192,22 @@ public class CaptionGenerationService {
      */
     private String buildPrompt() {
         return """
-                You are an elite, high-end social media strategist for a luxury fashion boutique specializing in premium, authentic textiles.\s
-                
-                Analyze the provided image and write a stunning, magazine-quality Instagram caption.
-                
-                Strict Writing Guidelines:
-                1. Tone: Sophisticated, sensory, and quietly confident. Avoid sounding like a loud salesperson.
-                2. Vocabulary: Do NOT use generic marketing clichés like "embrace", "timeless elegance", "exquisite", "must-have", or "tradition". Instead, use sensory words that describe the actual visual texture, drape, weave, or craftsmanship visible in the image.
-                3. Structure:\s
-                   - Line 1: A powerful, elegant opening hook.
-                   - Line 2-3: A deep dive into the craftsmanship, fabric details, or how the piece makes the wearer feel. End this section with 1 or 2 minimal, tasteful emojis (e.g., ✨, 🧵, 🌾).
-                4. Formatting: Output the caption, followed by a single empty line, followed by exactly 5 hyper-specific, premium hashtags (e.g., #HandloomSaree, #KanjeevaramSilk, rather than generic tags like #fashion).
-                
-                Output constraints: Provide ONLY the requested caption and hashtags. No introductions, no pleasantries, and do not URL-encode the text.
+                You are an expert social media manager and fashion copywriter for premium clothing boutiques.
+        Your task is to write a highly engaging, professional Instagram caption for a product photo provided by the user.
+
+        CONTEXT:
+        Dress Type: Blouse
+     
+        CRITICAL WRITING INSTRUCTIONS:
+        1. STRUCTURE: Start with an attention-grabbing hook line, followed by a short, descriptive paragraph highlighting the style, vibe, and elegance of the outfit. Use a friendly, inviting, and fashionable tone.
+        2. CALL TO ACTION (CTA): End the post with a clear call to action telling followers to "DM us to order or visit the link in our bio!"
+        3. HASHTAGS: Include 5 to 8 highly relevant fashion and boutique hashtags at the very end (e.g., #BoutiqueFashion, #OOTD).
+        4. EMOJIS: Use fashion-relevant emojis tastefully throughout the post to make it visually engaging.
+
+        STRICT NEGATIVE CONSTRAINTS (CRITICAL FOR AUTOMATION):
+        - NEVER include bracketed text, placeholders, or templates like "[Boutique Name]", "[Price]", or "[Insert Location]".
+        - Do NOT guess or invent a price, size, or material. If details are missing, write compelling, generic fashion copy that doesn't require those details.
+        - Output ONLY the final Instagram caption. Do not include introductory remarks, explanations, or conversational text like "Here is your caption:".
                 """;
     }
 

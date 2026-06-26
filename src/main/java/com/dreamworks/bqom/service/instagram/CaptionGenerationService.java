@@ -195,8 +195,6 @@ public class CaptionGenerationService {
                 You are an expert social media manager and fashion copywriter for premium clothing boutiques.
         Your task is to write a highly engaging, professional Instagram caption for a product photo provided by the user.
 
-        CONTEXT:
-        Dress Type: Blouse
      
         CRITICAL WRITING INSTRUCTIONS:
         1. STRUCTURE: Start with an attention-grabbing hook line, followed by a short, descriptive paragraph highlighting the style, vibe, and elegance of the outfit. Use a friendly, inviting, and fashionable tone.

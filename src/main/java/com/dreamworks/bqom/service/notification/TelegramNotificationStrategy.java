@@ -168,9 +168,88 @@ public class TelegramNotificationStrategy implements NotificationStrategy {
                 measurement);
     }
 
+    private String constructOrderStatusMessage(Map<String, String> parameters) {
+        String template = "Hi %s,\n\n Your order at %s is ready for pickup!  Please visit us at your earliest " +
+                "convenience.\n\nOrder ID: %s\n\nThank you for choosing us! 🙏";
+        return String.format(
+                template,
+                parameters.getOrDefault(NotificationConstants.CUSTOMER_NAME, ""),
+                parameters.getOrDefault(NotificationConstants.BOUTIQUE_NAME, ""),
+                parameters.getOrDefault(NotificationConstants.ORDER_ID, ""));
+    }
+
     @Override
-    public void sendOrderStatus(NotificationMessage notificationMessage) {
-        // TODO:
+    public void sendOrderStatus(NotificationMessage message) {
+        String tenantCode = message.getTenantCode();
+        log.info("[Telegram] Initiating order status notification for tenant={}", tenantCode);
+
+        // ── 1. Fetch config ────────────────────────────────────────────────────
+        TenantTelegramConfig config = telegramConfigRepository
+                .findActiveByTenantCode(tenantCode)
+                .orElseThrow(() -> {
+                    log.error("[Telegram] No active Telegram config found for tenant ={}. " +
+                                    "Create a config via POST /v1/bqom/tenants/{code}/telegram-config",
+                            tenantCode);
+                    return new NotificationException(tenantCode,
+                            "No active Telegram config for tenant: " + tenantCode);
+                });
+
+        // ── 2. Decrypt credentials ─────────────────────────────────────────────
+        //    Decryption is intentionally outside the try/catch below so that a
+        //    key misconfiguration surfaces as a distinct error, not as a
+        //    "delivery failed" error that might trigger a retry.
+        String botToken;
+        String chatId;
+        try {
+            botToken = encryptionService.decrypt(config.getBotToken());
+            chatId   = encryptionService.decrypt(config.getChatId());
+        } catch (EncryptionService.EncryptionException e) {
+            log.error("[Telegram] Failed to decrypt credentials for tenant={} — " +
+                    "possible key rotation mismatch. configId={}", tenantCode, config.getId(), e);
+            throw new NotificationException(tenantCode,
+                    "Credential decryption failed for tenant: " + tenantCode, e);
+        }
+
+        // ── 3. Build and send request ──────────────────────────────────────────
+        try {
+            String url         = buildSendMessageUrl(botToken);
+
+            String safeMessage = constructOrderStatusMessage(message.getParameters());
+
+            HttpEntity<Map<String, Object>> request = buildRequest(chatId, safeMessage);
+
+            log.info("[Telegram] POSTing to order status API for tenant={}, chatId={}",
+                    tenantCode, maskChatId(chatId));
+
+            ResponseEntity<String> response =
+                    restTemplate.exchange(url, HttpMethod.POST, request, String.class);
+
+            handleResponse(response, tenantCode);
+
+        } catch (NotificationException e) {
+            throw e; // already structured — re-throw as-is
+        } catch (HttpClientErrorException e) {
+            // 4xx — bad token / chat ID — configuration error, not transient
+            log.error("[Telegram] Client error ({}): {} — tenant={}, body={}",
+                    e.getStatusCode(), e.getMessage(), tenantCode,
+                    e.getResponseBodyAsString(), e);
+            throw new NotificationException(tenantCode,
+                    "Telegram API client error (" + e.getStatusCode() + ") for tenant: "
+                            + tenantCode + ". Check bot token and chat ID.", e);
+        } catch (HttpServerErrorException e) {
+            // 5xx — Telegram-side transient error
+            log.error("[Telegram] Server error ({}): {} — tenant={}",
+                    e.getStatusCode(), e.getMessage(), tenantCode, e);
+            throw new NotificationException(tenantCode,
+                    "Telegram API server error (" + e.getStatusCode() + ") for tenant: "
+                            + tenantCode + ". Retry later.", e);
+        } catch (RestClientException e) {
+            // Network-level failure (timeout, DNS, etc.)
+            log.error("[Telegram] Network error sending notification for tenant={}: {}",
+                    tenantCode, e.getMessage(), e);
+            throw new NotificationException(tenantCode,
+                    "Network failure sending Telegram notification for tenant: " + tenantCode, e);
+        }
     }
 
     // ── private helpers ────────────────────────────────────────────────────────

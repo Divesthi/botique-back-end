@@ -27,4 +27,5 @@ public class NotificationMessage {
     // Parameters using which the message will be sent based on the channel
     Map<String, String> parameters;
     private String toPhoneNumber;
+    private String toTelegramChatId;  // Telegram recipient — customer's linked chat id (order-status use case only)
 }

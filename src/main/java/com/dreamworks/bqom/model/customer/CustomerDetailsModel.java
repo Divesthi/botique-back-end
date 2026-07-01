@@ -22,4 +22,5 @@ public class CustomerDetailsModel {
     private String tenantCode;
     private OffsetDateTime creationDate;
     private OffsetDateTime updatedDate;
+    private String telegramChatId;
 }

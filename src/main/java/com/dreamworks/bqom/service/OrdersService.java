@@ -224,6 +224,7 @@ public class OrdersService {
                             parameters.put(NotificationConstants.ORDER_ID, orderDetails.getId().toString());
                             notificationMessage.setParameters(parameters);
                             notificationMessage.setToPhoneNumber(customer.getMobileNo());
+                            notificationMessage.setToTelegramChatId(customer.getTelegramChatId());
                             notificationDispatcher.dispatchOrderStatus(notificationMessage);
                         } else {
                             log.warn("Skipping WhatsApp notification — customer or tenant not found for order {}",

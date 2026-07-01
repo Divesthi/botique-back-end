@@ -44,6 +44,9 @@ public class CustomerDetails implements Serializable {
     @Column(name = "updated_date")
     private OffsetDateTime updatedDate;
 
+    @Column(name = "telegram_chat_id")
+    private String telegramChatId;
+
     public CustomerDetailsModel toModel() {
         return CustomerDetailsModel.builder()
         .name(name)
@@ -53,6 +56,7 @@ public class CustomerDetails implements Serializable {
         .updatedDate(updatedDate)
         .alternateContactNo(alternateContactNo)
         .id(id)
+        .telegramChatId(telegramChatId)
         .mobileNo(mobileNo).build();
     }
 
@@ -63,6 +67,7 @@ public class CustomerDetails implements Serializable {
                 .mobileNo(customerDetailsModel.getMobileNo())
                 .alternateContactNo(customerDetailsModel.getAlternateContactNo())
                 .tenantCode(customerDetailsModel.getTenantCode())
+                .telegramChatId(customerDetailsModel.getTelegramChatId())
                 .build();
     }
 }

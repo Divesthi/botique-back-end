@@ -199,10 +199,9 @@ public class TelegramNotificationStrategy implements NotificationStrategy {
         //    key misconfiguration surfaces as a distinct error, not as a
         //    "delivery failed" error that might trigger a retry.
         String botToken;
-        String chatId;
+        String chatId = message.getToTelegramChatId();
         try {
             botToken = encryptionService.decrypt(config.getBotToken());
-            chatId   = encryptionService.decrypt(config.getChatId());
         } catch (EncryptionService.EncryptionException e) {
             log.error("[Telegram] Failed to decrypt credentials for tenant={} — " +
                     "possible key rotation mismatch. configId={}", tenantCode, config.getId(), e);

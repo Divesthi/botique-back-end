@@ -6,6 +6,8 @@ import com.dreamworks.bqom.repository.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -52,7 +54,8 @@ public class OrderDetails extends BaseEntity implements Serializable {
     @Column(name = "balance")
     private Double balance;
 
-    @Column(name = "estimate_amount", columnDefinition = "JSON")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "estimate_amount")
     private String estimateAmount;
 
     @Column(name = "updated_date")

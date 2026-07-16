@@ -15,7 +15,13 @@ import java.util.List;
 @Repository
 public interface BillRepository extends JpaRepository<BaseEntity, Long> {
 
-    @Query("select bd from BillDetails bd where bd.customerDetails.tenantCode = :tenantCode")
+    @Query("select distinct bd from BillDetails bd " +
+            "join fetch bd.customerDetails cd " +
+            "left join fetch bd.ordersAssociations boa " +
+            "left join fetch boa.orderDetails od " +
+            "left join fetch od.orderItems oi " +
+            "left join fetch oi.itemCosts " +
+            "where cd.tenantCode = :tenantCode")
     List<BillDetails> getBills(@Param("tenantCode") String tenantCode);
 
     @Query("select bd from BillDetails bd where bd.id = :billId and bd.customerDetails.tenantCode = :tenantCode")

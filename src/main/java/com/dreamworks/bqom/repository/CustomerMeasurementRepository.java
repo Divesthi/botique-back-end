@@ -11,7 +11,9 @@ import java.util.List;
 @Repository
 public interface CustomerMeasurementRepository extends JpaRepository<CustomerMeasurementDetails, Long> {
 
-    @Query("select cmd from CustomerMeasurementDetails cmd where cmd.customerDetails.tenantCode = :tenantCode")
+    @Query("select cmd from CustomerMeasurementDetails cmd " +
+            "join fetch cmd.customerDetails cd " +
+            "where cd.tenantCode = :tenantCode")
     List<CustomerMeasurementDetails> findAllByTenantCode(@Param("tenantCode") String tenantCode);
 
     @Query("select cmd from CustomerMeasurementDetails cmd where cmd.customerDetails.mobileNo = :mobileNo and cmd.customerDetails.tenantCode = :tenantCode")

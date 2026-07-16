@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.BatchSize;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -64,6 +65,7 @@ public class BillDetails extends BaseEntity implements Serializable {
             fetch = FetchType.LAZY,
             mappedBy = "billDetails"
     )
+    @BatchSize(size = 50)
     private List<BillOrdersAssociation> ordersAssociations;
 
     public static BillDetails toEntity(BillModel model, CustomerDetails customerDetails) {

@@ -6,6 +6,7 @@ import com.dreamworks.bqom.repository.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -78,6 +79,7 @@ public class OrderDetails extends BaseEntity implements Serializable {
             fetch = FetchType.LAZY,
             mappedBy = "orderDetails"
     )
+    @BatchSize(size = 50)
     private List<OrderItemDetails> orderItems;
 
     public static OrderDetails toEntity(OrderModel model, CustomerDetails customerDetails) {

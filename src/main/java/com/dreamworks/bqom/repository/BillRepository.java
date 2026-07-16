@@ -19,8 +19,6 @@ public interface BillRepository extends JpaRepository<BaseEntity, Long> {
             "join fetch bd.customerDetails cd " +
             "left join fetch bd.ordersAssociations boa " +
             "left join fetch boa.orderDetails od " +
-            "left join fetch od.orderItems oi " +
-            "left join fetch oi.itemCosts " +
             "where cd.tenantCode = :tenantCode")
     List<BillDetails> getBills(@Param("tenantCode") String tenantCode);
 

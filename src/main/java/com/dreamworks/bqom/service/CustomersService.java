@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -29,6 +30,7 @@ public class CustomersService {
     @Autowired
     private NotificationDispatcher notificationDispatcher;
 
+    @Transactional(readOnly = true)
     public List<CustomerDetailsModel> getCustomers(String tenantCode) {
         List<CustomerDetails> customers = customersRepository.findAllByTenantCode(tenantCode);
         return customers.stream().map((customer) -> CustomerDetailsModel.builder()
@@ -43,6 +45,7 @@ public class CustomersService {
                 .build()).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<CustomerDetailsModel> searchCustomers(String searchTerm, String tenantCode) {
         if (StringUtils.isBlank(searchTerm)) {
             return getCustomers(tenantCode);
@@ -60,6 +63,7 @@ public class CustomersService {
                 .build()).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<CustomerDetailsModel> getCustomer(String contactNumber, String tenantCode) {
         CustomerDetails customerDetails = customersRepository.getCustomerDetailsByMobileNumber(contactNumber, tenantCode);
         if (customerDetails != null) {
@@ -74,6 +78,7 @@ public class CustomersService {
         }
     }
 
+    @Transactional
     public CustomerDetailsModel createCustomer(CustomerDetailsModel customerDetailsModel, String tenantCode) {
         try {
             customerDetailsModel.setTenantCode(tenantCode);
@@ -90,6 +95,7 @@ public class CustomersService {
         return customerDetailsModel;
     }
 
+    @Transactional
     public CustomerDetailsModel updateCustomer(CustomerDetailsModel customerDetailsModel, String tenantCode) {
         try {
             Optional<CustomerDetails> customerDetailOpt = customersRepository.findById(customerDetailsModel.getId());
@@ -110,6 +116,7 @@ public class CustomersService {
         return customerDetailsModel;
     }
 
+    @Transactional(readOnly = true)
     public List<CustomerMeasurementModel> getCustomerMeasurements(String mobileNo, String tenantCode) {
         List<CustomerMeasurementModel> customerMeasurementModels = null;
         try {
@@ -135,6 +142,7 @@ public class CustomersService {
         return customerMeasurementModels;
     }
 
+    @Transactional(readOnly = true)
     public List<CustomerMeasurementModel> getMeasurements(String tenantCode) {
         List<CustomerMeasurementModel> customerMeasurementModels = null;
         try {
@@ -159,6 +167,7 @@ public class CustomersService {
         return customerMeasurementModels;
     }
 
+    @Transactional(readOnly = true)
     public List<CustomerMeasurementModel> searchMeasurements(String searchTerm, String tenantCode) {
         if (StringUtils.isBlank(searchTerm)) {
             return getMeasurements(tenantCode);
@@ -186,6 +195,7 @@ public class CustomersService {
         return customerMeasurementModels;
     }
 
+    @Transactional
     public CustomerMeasurementModel createCustomerMeasurement(CustomerMeasurementModel measurementModel, String tenantCode) {
         try {
             List<CustomerMeasurementDetails> measurementDetails = customerMeasurementRepository
@@ -211,6 +221,7 @@ public class CustomersService {
         return measurementModel;
     }
 
+    @Transactional
     public void deleteCustomer(Long customerId, String tenantCode) {
         Optional<CustomerDetails> customerOpt = customersRepository.findById(customerId);
         if (customerOpt.isEmpty() || !customerOpt.get().getTenantCode().equals(tenantCode)) {
@@ -224,6 +235,7 @@ public class CustomersService {
         }
     }
 
+    @Transactional
     public void deleteMeasurement(Long measurementId, String tenantCode) {
         Optional<CustomerMeasurementDetails> measurementOpt = customerMeasurementRepository.findById(measurementId);
         if (measurementOpt.isEmpty() || !measurementOpt.get().getCustomerDetails().getTenantCode().equals(tenantCode)) {
@@ -232,6 +244,7 @@ public class CustomersService {
         customerMeasurementRepository.deleteById(measurementId);
     }
 
+    @Transactional
     public CustomerMeasurementModel updateCustomerMeasurement(CustomerMeasurementModel measurementModel, String tenantCode) {
         try {
             Optional<CustomerMeasurementDetails> customerMeasurementDetails = customerMeasurementRepository.findById(measurementModel.getId());
@@ -254,6 +267,7 @@ public class CustomersService {
         }
     }
 
+    @Transactional(readOnly = true)
     public CustomerMeasurementModel shareMeasurement(String tenantCode,
                                                      Long measurementId,
                                                      MeasurementShareRequest measurementShareRequest) {

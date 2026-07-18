@@ -48,7 +48,7 @@ public class CustomerMeasurementDetails implements Serializable {
     private String tenantCode;
 
     @OneToOne(
-            fetch = FetchType.EAGER,
+            fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumns({
             @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no"),

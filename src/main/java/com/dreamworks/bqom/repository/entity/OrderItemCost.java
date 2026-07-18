@@ -32,7 +32,7 @@ public class OrderItemCost extends BaseEntity implements Serializable {
     @Column(name = "tenant_code", insertable = false, updatable = false)
     private String tenantCode;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no", updatable = false),
             @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code", updatable = false)

@@ -11,11 +11,11 @@ import com.dreamworks.bqom.repository.TenantRepository;
 import com.dreamworks.bqom.repository.entity.*;
 import com.dreamworks.bqom.repository.enums.OrderStatus;
 import com.dreamworks.bqom.service.notification.NotificationDispatcher;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -35,6 +35,7 @@ public class OrdersService {
     @Autowired
     private NotificationDispatcher notificationDispatcher;
 
+    @Transactional(readOnly = true)
     public List<OrderModel> getOrders(String tenantCode) {
         List<OrderDetails> orders = ordersRepository.getOrders(tenantCode);
         return orders.stream().map((order) -> {
@@ -43,6 +44,7 @@ public class OrdersService {
         }).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<OrderModel> searchOrders(String searchTerm, String tenantCode) {
         if (StringUtils.isBlank(searchTerm)) {
             return getOrders(tenantCode);
@@ -54,11 +56,13 @@ public class OrdersService {
         }).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<OrderModel> getOrdersByDateRange(OffsetDateTime fromDate, OffsetDateTime toDate, String tenantCode) {
         List<OrderDetails> orders = ordersRepository.getOrdersByDateRange(fromDate, toDate, tenantCode);
         return orders.stream().map(OrderDetails::toModel).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<OrderModel> searchOrdersWithDateRange(String searchTerm, OffsetDateTime fromDate, OffsetDateTime toDate, String tenantCode) {
         List<OrderDetails> orders;
         if (StringUtils.isBlank(searchTerm)) {

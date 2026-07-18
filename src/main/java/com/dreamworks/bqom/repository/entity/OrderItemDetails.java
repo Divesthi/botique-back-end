@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.BatchSize;
 
 import java.io.Serializable;
 import java.util.List;
@@ -38,18 +39,18 @@ public class OrderItemDetails extends BaseEntity implements Serializable {
     @Column(name = "tenant_code", insertable = false, updatable = false)
     private String tenantCode;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(name = "mobile_no", referencedColumnName = "mobile_no", updatable = false),
             @JoinColumn(name = "tenant_code", referencedColumnName = "tenant_code", updatable = false)
     })
     private CustomerDetails customerDetails;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private OrderDetails orderDetails;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "measurement_id", referencedColumnName = "id")
     private CustomerMeasurementDetails customerMeasurementDetails;
 
@@ -57,6 +58,7 @@ public class OrderItemDetails extends BaseEntity implements Serializable {
             fetch = FetchType.LAZY,
             mappedBy = "orderItemDetails"
     )
+    @BatchSize(size = 50)
     private List<OrderItemCost> itemCosts;
 
     public static OrderItemDetails toEntity(OrderItemModel model, CustomerDetails customerDetails,

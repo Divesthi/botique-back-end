@@ -10,7 +10,7 @@ import com.dreamworks.bqom.repository.entity.BillOrdersAssociation;
 import com.dreamworks.bqom.repository.entity.CustomerDetails;
 import com.dreamworks.bqom.repository.entity.OrderDetails;
 import com.dreamworks.bqom.repository.enums.BillStatus;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +29,12 @@ public class BillsService {
     @Autowired
     private CustomersRepository customersRepository;
 
+    @Transactional(readOnly = true)
     public List<BillModel> getBills(String tenantCode) {
         return billRepository.getBills(tenantCode).stream().map(BillDetails::toModel).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<BillModel> searchBills(String searchTerm, String tenantCode) {
         if (StringUtils.isBlank(searchTerm)) {
             return getBills(tenantCode);
@@ -40,10 +42,12 @@ public class BillsService {
         return billRepository.searchBills(searchTerm, tenantCode).stream().map(BillDetails::toModel).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<BillModel> getBillsByDateRange(OffsetDateTime fromDate, OffsetDateTime toDate, String tenantCode) {
         return billRepository.getBillsByDateRange(fromDate, toDate, tenantCode).stream().map(BillDetails::toModel).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<BillModel> searchBillsWithDateRange(String searchTerm, OffsetDateTime fromDate, OffsetDateTime toDate, String tenantCode) {
         List<BillDetails> bills;
         if (StringUtils.isBlank(searchTerm)) {
@@ -100,6 +104,7 @@ public class BillsService {
         log.info("Bill {} deleted successfully", billId);
     }
 
+    @Transactional
     public BillModel updateBill(BillModel billModel, String tenantCode) {
         try {
             BillDetails billDetails = billRepository.getBillById(billModel.getId(), tenantCode);
